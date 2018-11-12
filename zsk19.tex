@@ -1,0 +1,144 @@
+%% LyX 2.3.1 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[english]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{babel}
+\begin{document}
+\global\long\def\E{\mathbb{E}}%
+\global\long\def\R{\mathbb{R}}%
+\global\long\def\F{\mathcal{F}}%
+\global\long\def\charf{\mathbf{1}}%
+\global\long\def\barxi{\overline{\xi}}%
+\global\long\def\X{\mathcal{X}}%
+
+
+\section*{Description of the problem}
+
+A risk-averse steel company, minimizing the discounted nested mean-CVaR
+risk measure, decides on ways of covering their emissions $Y_{1},\dots,Y_{T}$
+by a single type of allowances. At each $t=1,\dots,T$, $r_{t}$ allowances
+is given (grandfathered) to the company for free. Further, allowances
+may be bought (sold) at a secondary market at any time $t=0,\dots,T$.
+The allowances may be saved (banked) for future periods. 
+
+In addition to the spots, at each $t=0,\dots,T-1,$ futures with maturities
+$t+1,t+2.\dots.T,$ may be bought. For simplicity, it is assumed that
+the futures margin (which has to be deposited upon purchasing the
+future) is equal to the future-spot spread (this assumption may be
+relaxed). 
+
+Moreover, at each $t=0,\dots,T-1$, call options with maturities $t+1,t+2.\dots.T,$
+and strike prices $K_{1},\dots,K_{\kappa}$ may be bought at $t$,
+premiums computed by the Black-Scholes formula (possibly adjusted
+for smile) for $t>0$. At the time of their maturity, the options
+need not be exercised; however, as exercising only some options is
+always no worse than excising all options and possibly selling the
+difference, we may assume all the options are exercised.
+
+The company may fund their emission trading by loans with an interest
+rate $\varrho$. The insufficiency of cash at $T$ is penalized by
+a prohibitive interest rate $\iota$.
+
+\subsection*{Problem definition}
+
+
+\[
+\min_{x_{t}\in\X_{t},0\leq t\leq T}\rho\left(-z_{0},\dots,-z_{T}\right)
+\]
+Here,
+\[
+\xi_{t}=(X_{t},Y_{t},P_{t},Q_{t},B_t)
+\]
+where $X_t\in \R_+$ is the profit from the production at time $t$, $Y_t \in \R_+$ are the emissions at $t$, $P_t\in\R_{+}$ and $Q_t\in\R_{+}^{T-t}$, $B_{t}\in\R_{+}^{T-t\times\kappa}$
+are spot prices, future-spot margins, option prices,
+respectively, at time $t$. In particular, $Q_t^\tau$ is the difference of the future- and the spot price with maturity at $\tau$ and $B_t^{\tau,i}$ is the premium paid at $t$ for the call option with the strike price $K_i$ with maturity $\tau$. 
+
+The decision variables are as follows:
+$$
+x_t=(e_{t},f_{t},\phi_{t},z_t,c_{t})
+$$
+where, $s_{t}$ is the number of
+the spot allowances held at $t$, $f_{t}=(f_{t}^{t+1},\dots,f_{t}^{T})$
+are the numbers of the futures with maturities $t+1,\dots,T$ held and 
+\[
+\phi_{t}=\left[\begin{array}{ccc}
+\phi_{t}^{1,t+1} & \dots & \phi_{t}^{1,T}\\
+\vdots &  & \vdots\\
+\phi_{t}^{\kappa,t+1} & \dots & \phi_{t}^{\kappa,T}
+\end{array}\right]
+\]
+are the numbers of call potions held. Further, $z_t$ is the cash-flow at and $c_t$ is the debt after $t$. 
+
+Further, 
+\begin{multline*}
+\X_{0}=\{(s_{0},f_{0},\phi_{0},z_0,c_{0}): s_0 \geq 0, f_0\geq0,
+\phi_{t} \geq0,
+\\
+z_0=-P_0s_0-\sum_{\tau=1}^{T}(\rho^{\tau}P_0+Q_0^{\tau})f_0^{\tau}-  \sum_{\tau=1}^{T}\sum_{i=1}^{\kappa}B_0^{\tau,i}\phi_0^{\tau,i},\\ c_0 = [z_0]_-
+\}.
+\end{multline*}
+For any $0<t<T$,
+\begin{multline*}
+\X_{t}(s_{t-1},f_{t-1}, \phi_{t-1}, c_{t-1})=\{(s_{t},f_{t},\phi_{t},z_t,c_{t})\in  \F_t: e_t \geq 0, f_t\geq0,
+\phi_{t} \geq0,
+\\
+z_t  =X_t-P_t [s_t+Y_t-(s_{t-1} + r_t +
+f_{t-1}^t+\sum_{i=1}^{\kappa}\phi_{t-1}^{t,i})
+]-\sum_{i=1}^{\kappa}\min(P_t,K_{i})\phi_{t-1}^{t,i}
+ \\ \qquad\qquad-\sum_{\tau=t+1}^{T}(\rho^{\tau-t}P_t+Q_t^{\tau})\Delta f_t^{\tau-t}-\sum_{\tau=t+1}^{T}\sum_{i=1}^{\kappa}B_t^{\tau,i}\Delta\phi_t^{\tau-t,i}-\varrho c_{t-1},
+\\
+c_t =  [z_t-c_{t-1}]_-\}.
+\end{multline*}	
+Finally,
+$$
+\X_T(s_{T-1},f_{T-1}, \phi_{T-1}, c_{T-1}) 
+=
+\{z_T: z_T = e_T-\iota[e_T]_-\}
+$$
+where
+\begin{multline*}	 e_T= X_T-P_T [Y_T-(s_{T-1}+r_T
++f_{T-1}^T+\sum_{i=1}^{\kappa}\phi_T^{T-1,i})]-\sum_{i=1}^{\kappa}\min(P_T,K_{i}) \phi_T^{T-1,i}
+-\varrho c_{T-1}.
+\end{multline*}	
+
+
+
+\section{Data}
+\begin{itemize}
+\item $T=0$ odpovídá začátku 2018, $T=3$ (end of 2020)
+\item $P$, budeme modelovat stejně jako v ANORu s6ř45 (bez diskretizace)  
+\item $Q$ taktéž (s7ř26) - bez předpokladu, že je spread deterministický
+\end{itemize}
+Oba modely znovu odhadnu, ale asi by to chtělo z čerstvějších dat, takže bych poprosil spoty a futury až do konce 2017, nemusejí být moc do minulosti, stačí rok dva (denních dat)
+
+Nově máme
+\begin{itemize}
+\item $B$ - opce. Tady bych poprosil o odhad tebe (nikdy jsem to nedělal, tak to vyjde nastejno:-)). Rámocový postup: vzít historické ceny opcí, vyjádřit si jejich cenu pomocí black scholese s neznámou volatilitou a pak tu volatilitu nastavit tak, aby seděla (výsledku se říká implikovaná volatilita). Jako bezrizikový výnos lze vzít některou úrokovou sazbu ČNB. Pokud bude implikovaná volatilita pro jednotlivé strike ceny hodně jiná, bude se muset udělat něco jako "adjust for smile effect". Výsledkem bude vzoreček, do kterého pak já dosadím spot cenu a strike cenu, a on mmi vyhodí cenu opce. V nesnázích by asi bylo možné obrátit se na Tomáše Tichého (kdyžtak zprostředkuju)
+\item $X_t$, $Y_t$:  tohle je na vás. Protože se ani $X_t$ ani $Y_t$ nenásobí s jinou rozhodovací proměnnou, může se udělat trik, že se $X$ a $Y$ budou považovat za rozhodovací proměnnou a tím se může zachovat stagewise independence. 
+
+Můžeme mít například
+$$
+(X_t,Y_t)' = A (X_{t-1},Y_{t-1})' + b P_{t-1} +  c P_t + \epsilon_t, 
+$$
+kde $A \in \R^{2 \times 2}$, $b,c \in \R^{1\times 2}$ a $\epsilon_t$ jsou i.i.d.
+(tam by bylo $\zeta_t = (X_t,Y_t)', \zeta_t = r_{t-1}+c P_t + \epsilon_t$, $r_{t-1}= A \zeta_{t-1} + b P_{t-1}$), 
+
+Nebo třeba
+$$
+(X_t,Y_t)'= A(X_{t-1},Y_{t-1})' P^\alpha_{t-1} P^\beta_t  \epsilon_t
+$$
+$\alpha,\beta \geq 0$ (tam by bylo $\zeta_t = r_{t-1} P^\beta_t\epsilon_t, r_{t-1}=w_{t-1} P^\alpha_{t-1}, w_{t-1} = A \zeta_{t-1}$)
+První způsob je jednodušší, ale může nás dostat do mínusu, druhej je krkolomnější.
+
+Pokud se ale vzdáme interakcí mezi $X$ a $Y$, a budeme předpokládat 
+$$
+X_t=a X_{t-1} P_{t-1}^\alpha P_t^\beta\epsilon_t
+$$
+(podobně $Y$), pak je to celkem elegantní, protože se to dá přepsat jako $x_t=\log a + x_{t-1} + \alpha P_{t-1} + \beta P_t +\varepsilon_t$  kde $x_t=\log X_t$. (Samozřejmě by bylo skvělý mít koeficient i u $x_{t-1}$, ale to bhžl nejde).
+
+\end{itemize}
+
+\end{document}
