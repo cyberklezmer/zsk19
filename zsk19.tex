@@ -6,6 +6,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{babel}
+\usepackage{pgf}
 \begin{document}
 \global\long\def\E{\mathbb{E}}%
 \global\long\def\R{\mathbb{R}}%
@@ -112,6 +113,33 @@ where
 \item $P$, budeme modelovat stejně jako v ANORu s6ř45 (bez diskretizace)  
 \item $Q$ taktéž (s7ř26) - bez předpokladu, že je spread deterministický
 \end{itemize}
+
+Option prices $B^{\tau,i}_t$ are computed according to the Black-Scholes formula where the implied volatility is a quadratic function of the strike price relative to the spot price. The shape of the function, depicted in Picture XX, has been estimated using 110 observations of actual option prices on ???market. As the risk-less rate ??? was taken. 
+
+\pgfimage[width=7cm]{smile}
+
+
+
+Model for $(X,Y)$. As both the correlations of $X_t,Y_t$ with $P_t$, $P_{t-1}$  and correlations $\Delta X_t,\Delta Y_t$ with $\Delta P_t$, $\Delta P_{t-1}$ are insignificant, we model $X,Y$ alone, without dependence on $P$. The time series-- plots and xy--plots of $X,Y$ and their differences can be seen in Figures:
+
+\pgfimage[width=5cm]{tsplot}
+\pgfimage[width=5cm]{dtsplot}
+
+
+\pgfimage[width=5cm]{xyplot}
+\pgfimage[width=5cm]{dxyplot}
+
+As it could have been expected, the values of $X$ and $Y$ ``go along''. As the ADF tests rejected unit root hypothesis for both the series, we chose VAR model with a single lag to fit their time dependence:
+$$
+X_t=2306.45 +   1.26237 X_{t-1}  -0.158943 Y_{t-1} + \epsilon_t
+$$
+$$
+Y_t=12852.2  +   2.24683  X_{t-1} + \varepsilon_t
+$$
+with $\mathrm{stdev}(\epsilon_1)=809.6647$, $\mathrm{stdev}(\varepsilon_1)=4882.004$ and $\mathrm{corr}(\epsilon_1,\varepsilon_1)=0.907$. Highly improbable negative observations are truncated to zero, if they appear during the computation. 
+
+\end{document}
+
 Oba modely znovu odhadnu, ale asi by to chtělo z čerstvějších dat, takže bych poprosil spoty a futury až do konce 2017, nemusejí být moc do minulosti, stačí rok dva (denních dat)
 
 Nově máme
@@ -135,7 +163,7 @@ První způsob je jednodušší, ale může nás dostat do mínusu, druhej je kr
 
 Pokud se ale vzdáme interakcí mezi $X$ a $Y$, a budeme předpokládat 
 $$
-X_t=a X_{t-1} P_{t-1}^\alpha P_t^\beta\epsilon_t
+X_t=a X_{t-1} p_{t-1}^\beta p_t^\gamma\epsilon_t
 $$
 (podobně $Y$), pak je to celkem elegantní, protože se to dá přepsat jako $x_t=\log a + x_{t-1} + \alpha P_{t-1} + \beta P_t +\varepsilon_t$  kde $x_t=\log X_t$. (Samozřejmě by bylo skvělý mít koeficient i u $x_{t-1}$, ale to bhžl nejde).
 

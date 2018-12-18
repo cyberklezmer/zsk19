@@ -1,0 +1,3 @@
+open ../data/options.xlsx --sheet=2
+relp=strike-spot
+gnuplot volatility relp #Edit - change to quadratic fit

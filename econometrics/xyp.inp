@@ -1,0 +1,16 @@
+open ../data/CM.xlsx --sheet=2
+diff X Y P
+xypc<- corr X Y P P(-1)
+dxypc<- corr d_X d_Y d_P d_P(-1)
+xyplot<-gnuplot X Y
+dxyplot<-gnuplot d_X d_Y
+tsplot<-gnuplot X Y --time-series --with-lines
+dtsplot<-gnuplot d_X d_Y --time-series --with-lines
+xdf<-adf 1 X --c --ct --test-down=AIC
+ydf<-adf 1 Y --c --ct --test-down=AIC
+lagselect<-var 5 X Y --lagselect
+xyvar<-var 1 X Y
+final<-system method=fiml
+    equation X const X(-1) Y(-1)
+    equation Y const X(-1)
+end system
