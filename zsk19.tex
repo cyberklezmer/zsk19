@@ -18,8 +18,7 @@
 
 \section*{Description of the problem}
 
-A risk-averse steel company, minimizing the discounted nested mean-CVaR
-risk measure, decides on ways of covering their emissions $Y_{1},\dots,Y_{T}$
+A steel company, decides on ways of covering their emissions $Y_{1},\dots,Y_{T}$ stemming from their exogenously given production, at times $1,\dots,T$,
 by a single type of allowances. At each $t=1,\dots,T$, $r_{t}$ allowances
 is given (grandfathered) to the company for free. Further, allowances
 may be bought (sold) at a secondary market at any time $t=0,\dots,T$.
@@ -29,12 +28,11 @@ In addition to the spots, at each $t=0,\dots,T-1,$ futures with maturities
 $t+1,t+2.\dots.T,$ may be bought. For simplicity, it is assumed that
 the futures margin (which has to be deposited upon purchasing the
 future) is equal to the future-spot spread (this assumption may be
-relaxed). 
+relaxed for the price of additional decision variables). 
 
 Moreover, at each $t=0,\dots,T-1$, call options with maturities $t+1,t+2.\dots.T,$
-and strike prices $K_{1},\dots,K_{\kappa}$ may be bought at $t$,
-premiums computed by the Black-Scholes formula (possibly adjusted
-for smile) for $t>0$. At the time of their maturity, the options
+and strike prices $K_{1},\dots,K_{\kappa}$ may be bought at $t$.
+At the time of their maturity, the options
 need not be exercised; however, as exercising only some options is
 always no worse than excising all options and possibly selling the
 difference, we may assume all the options are exercised.
@@ -42,6 +40,9 @@ difference, we may assume all the options are exercised.
 The company may fund their emission trading by loans with an interest
 rate $\varrho$. The insufficiency of cash at $T$ is penalized by
 a prohibitive interest rate $\iota$.
+
+The company is risk-averse minimizing the nested mean-CVaR
+risk measure, applied to the sum of profits $X_1,\dots,X_T$ from the production and the costs of emission trading.
 
 \subsection*{Problem definition}
 
@@ -55,15 +56,15 @@ Here,
 \]
 where $X_t\in \R_+$ is the profit from the production at time $t$, $Y_t \in \R_+$ are the emissions at $t$, $P_t\in\R_{+}$ and $Q_t\in\R_{+}^{T-t}$, $B_{t}\in\R_{+}^{T-t\times\kappa}$
 are spot prices, future-spot margins, option prices,
-respectively, at time $t$. In particular, $Q_t^\tau$ is the difference of the future- and the spot price with maturity at $\tau$ and $B_t^{\tau,i}$ is the premium paid at $t$ for the call option with the strike price $K_i$ with maturity $\tau$. 
+respectively, at time $t$. In particular, $Q_t^\tau$ is the future-spot difference of the future with maturity at $\tau$, and $B_t^{\tau,i}$ is the premium paid at $t$ for the call option with the strike price $K_i$ with maturity $\tau$. 
 
-The decision variables are as follows:
+The decision variables are
 $$
-x_t=(e_{t},f_{t},\phi_{t},z_t,c_{t})
+x_t=(s_{t},f_{t},\phi_{t},z_t,c_{t})
 $$
 where, $s_{t}$ is the number of
 the spot allowances held at $t$, $f_{t}=(f_{t}^{t+1},\dots,f_{t}^{T})$
-are the numbers of the futures with maturities $t+1,\dots,T$ held and 
+are the numbers of the futures with maturities $t+1,\dots,T$ held, and 
 \[
 \phi_{t}=\left[\begin{array}{ccc}
 \phi_{t}^{1,t+1} & \dots & \phi_{t}^{1,T}\\
@@ -78,7 +79,7 @@ Further,
 \X_{0}=\{(s_{0},f_{0},\phi_{0},z_0,c_{0}): s_0 \geq 0, f_0\geq0,
 \phi_{t} \geq0,
 \\
-z_0=-P_0s_0-\sum_{\tau=1}^{T}(\rho^{\tau}P_0+Q_0^{\tau})f_0^{\tau}-  \sum_{\tau=1}^{T}\sum_{i=1}^{\kappa}B_0^{\tau,i}\phi_0^{\tau,i},\\ c_0 = [z_0]_-
+z_0=-P_0s_0-\sum_{\tau=1}^{T}(\rho^{\tau}P_0+Q_0^{\tau})f_0^{\tau}-  \sum_{\tau=1}^{T}\sum_{i=1}^{\kappa}B_0^{\tau,i}\phi_0^{\tau,i}, c_0 = [z_0]_-
 \}.
 \end{multline*}
 For any $0<t<T$,
@@ -90,7 +91,6 @@ z_t  =X_t-P_t [s_t+Y_t-(s_{t-1} + r_t +
 f_{t-1}^t+\sum_{i=1}^{\kappa}\phi_{t-1}^{t,i})
 ]-\sum_{i=1}^{\kappa}\min(P_t,K_{i})\phi_{t-1}^{t,i}
  \\ \qquad\qquad-\sum_{\tau=t+1}^{T}(\rho^{\tau-t}P_t+Q_t^{\tau})\Delta f_t^{\tau-t}-\sum_{\tau=t+1}^{T}\sum_{i=1}^{\kappa}B_t^{\tau,i}\Delta\phi_t^{\tau-t,i}-\varrho c_{t-1},
-\\
 c_t =  [z_t-c_{t-1}]_-\}.
 \end{multline*}	
 Finally,
@@ -108,19 +108,32 @@ where
 
 
 \section{Data}
-\begin{itemize}
-\item $T=0$ odpovídá začátku 2018, $T=3$ (end of 2020)
-\item $P$, budeme modelovat stejně jako v ANORu s6ř45 (bez diskretizace)  
-\item $Q$ taktéž (s7ř26) - bez předpokladu, že je spread deterministický
-\end{itemize}
 
-Option prices $B^{\tau,i}_t$ are computed according to the Black-Scholes formula where the implied volatility is a quadratic function of the strike price relative to the spot price. The shape of the function, depicted in Picture XX, has been estimated using 110 observations of actual option prices on ???market. As the risk-less rate ??? was taken. 
+$T=0$ odpovídá začátku 2018, $T=3$ (end of 2020)
+
+For the spot prices $P$ and the spreads $Q$ we adopt model from (anor). In particular, we fit the evolution of $P$ by 
+\[
+P_{t}=P_{0}\exp\left\{ \sum\nolimits_{\tau=1}^t u_{\tau} \right\},
+\qquad u_t \sim \mathcal{N}\left(
+-\frac{\sigma^2}{2},\sigma^2
+\right),\qquad 1\leq t \leq T, 
+\]
+with $\sigma=0.439$ where $u_{1},\dots,u_T$ are i.i.d., and
+\[
+Q^\tau_{t}=P_t\exp\{(\tau-t)(0.00974+v^\tau_{t})\},\qquad v^\tau_{t}\sim \mathcal{N}(0,\varsigma^2),\qquad 1\leq t< \tau,\quad 1\leq \tau \leq T,
+\]
+with $\varsigma=0.010$ where $v^2_1,v_1^3,v_2^3,\dots$ are i.i.d., independent of $u_1,\dots,u_T$.
+
+The initial prices are equal to 
+$$P_0=7.77, \quad Q^1_0=0.04,\quad Q^2_0=0.1,\quad Q^3_0=0.2$$ %markets.businessinsider.com
+
+Option prices $B^{\tau,i}_t$ are computed by the Black-Scholes formula with the implied volatility being a quadratic function of the strike price relative to the spot price. The shape of the function, depicted in Picture XX, has been estimated using 110 observations of actual option prices on ???market. As the risk-less rate ??? was taken. 
 
 \pgfimage[width=7cm]{smile}
 
+Our model of profits $X$ and emissions $Y$ was estimated using their monthly hypothetical historical values from 2014 to 2016, which were constructed as follows: TBD FRANTA.
 
-
-Model for $(X,Y)$. As both the correlations of $X_t,Y_t$ with $P_t$, $P_{t-1}$  and correlations $\Delta X_t,\Delta Y_t$ with $\Delta P_t$, $\Delta P_{t-1}$ are insignificant, we model $X,Y$ alone, without dependence on $P$. The time series-- plots and xy--plots of $X,Y$ and their differences can be seen in Figures:
+As all the correlations of any of $X_t,Y_t$ with any of $P_t$, $P_{t-1}$  and correlations of any of $\Delta X_t,\Delta Y_t$ with any of $\Delta P_t$, $\Delta P_{t-1}$ are insignificant, we model $X,Y$ alone, independently of $P$. The time series plots and xy--plots of processes $X_t,Y_t$ and the processes of their first differences can be seen in Figures:
 
 \pgfimage[width=5cm]{tsplot}
 \pgfimage[width=5cm]{dtsplot}
@@ -129,14 +142,20 @@ Model for $(X,Y)$. As both the correlations of $X_t,Y_t$ with $P_t$, $P_{t-1}$  
 \pgfimage[width=5cm]{xyplot}
 \pgfimage[width=5cm]{dxyplot}
 
-As it could have been expected, the values of $X$ and $Y$ ``go along''. As the ADF tests rejected unit root hypothesis for both the series, we chose VAR model with a single lag to fit their time dependence:
-$$
-X_t=2306.45 +   1.26237 X_{t-1}  -0.158943 Y_{t-1} + \epsilon_t
-$$
-$$
-Y_t=12852.2  +   2.24683  X_{t-1} + \varepsilon_t
-$$
+In can be clearly seen that the values of $X_t$ and $Y_t$ ``go along'' as well as their first differences, so it is worth to model their evolution jointly. As the ADF tests rejected unit root hypothesis for both the series, we chose VAR model with the single lag to fit their time evolution:
+\begin{equation}\label{xymodel}
+\begin{aligned}
+X_t&=2306	.45 +   1.26237 X_{t-1}  -0.158943 Y_{t-1} + \epsilon_t \\
+Y_t&=12852.2  +   2.24683  X_{t-1} + \varepsilon_t
+\end{aligned}
+\end{equation}
 with $\mathrm{stdev}(\epsilon_1)=809.6647$, $\mathrm{stdev}(\varepsilon_1)=4882.004$ and $\mathrm{corr}(\epsilon_1,\varepsilon_1)=0.907$. Highly improbable negative observations are truncated to zero, if they appear during the computation. 
+
+The initial values 
+$$
+X_0 = 2744.83,\qquad Y_0 = 18982.64
+$$
+were obtained by a year-ahead forecast in (\ref{xymodel}).
 
 \end{document}
 
