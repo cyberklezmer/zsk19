@@ -23,3 +23,11 @@
 *.synctex.gz
 
 *.xlsx#
+
+comp/src/CMakeLists\.txt\.user
+
+comp/build-test-Qt_5_7_0_gcc_64-Default/cmake_install\.cmake
+
+comp/build-test-Qt_5_7_0_gcc_64-Default/
+
+trash/
