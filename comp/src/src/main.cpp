@@ -8,6 +8,7 @@
 
 using namespace mspp;
 
+
 /*
 template <typename O>
 void alm1test(bool equivalent)
@@ -172,6 +173,47 @@ int main(int, char **)
     sys::seed(0);
 //    using O=csvlpsolver<realvar>;
     using O=cplex<realvar>;
+
+
+    assert(nstrikes<=maxstrikes);
+    vector<vector<double>> etasqV(5);
+    etasqV.push_back({epsvsq[0][0],epsvsq[0][1],0,0,0});
+    etasqV.push_back({epsvsq[1][0],epsvsq[1][1],0,0,0});
+    etasqV.push_back({0,0,varsigma,0,0});
+    etasqV.push_back({0,0,0,varsigma,0});
+    etasqV.push_back({0,0,0,0,varsigma});
+
+    using stdd_t=ldistribution<double>;
+    stdd_t stdd({-1,1});
+
+    using etad_t = meanvardistribution<stdd_t>;
+
+    etad_t etad({0,0,qcoef,qcoef,qcoef},etasqV,stdd);
+
+    using dirac_t = diracdistribution<vector<double>>;
+    using etapd_t = iidprocessdistribution<etad_t>;
+
+    etapd_t eta(dirac_t({0,0,v0[0],v0[1],v0[2]}),etad,T+1);
+
+    double xim = -sigma*sigma/2.0;
+    double xisd = sigma;
+
+    arnormalprocessdistribution xipd(0,xim,xisd,1.0,T);
+
+    vector<unsigned int> nx;
+    for(unsigned int i=1;i<=T; i++)
+        nx.push_back(i);
+
+    using ha_t
+       = chmcapproximation<arnormalprocessdistribution,onedcovering>;
+
+    ha_t ha(xipd,nx);
+
+    using xieta_t = xietaprocessdist<ha_t,etapd_t>;
+    xieta_t xieta(ha,eta);
+
+    using zeta_t = hmczeta<pair<double, vector<double>>,zskm>;
+
 
     return 0;
 }

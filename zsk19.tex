@@ -18,92 +18,99 @@
 
 \section*{Description of the problem}
 
-A steel company, decides on ways of covering their emissions $Y_{1},\dots,Y_{T}$ stemming from their exogenously given production, at times $1,\dots,T$,
+A steel company decides on ways of covering their emissions $Y_{1},\dots,Y_{T}$ stemming from their exogenously given production, at times $1,\dots,T$,
 by a single type of allowances. At each $t=1,\dots,T$, $r_{t}$ allowances
 is given (grandfathered) to the company for free. Further, allowances
 may be bought (sold) at a secondary market at any time $t=0,\dots,T$.
 The allowances may be saved (banked) for future periods. 
 
 In addition to the spots, at each $t=0,\dots,T-1,$ futures with maturities
-$t+1,t+2.\dots.T,$ may be bought. For simplicity, it is assumed that
-the futures margin (which has to be deposited upon purchasing the
-future) is equal to the future-spot spread (this assumption may be
-relaxed for the price of additional decision variables). 
-
-Moreover, at each $t=0,\dots,T-1$, call options with maturities $t+1,t+2.\dots.T,$
+$t+1,t+2.\dots.T,$ may be bought. Moreover, at each $t=0,\dots,T-1$, call options with maturities $t+1,t+2.\dots.T,$
 and strike prices $K_{1},\dots,K_{\kappa}$ may be bought at $t$.
-At the time of their maturity, the options
-need not be exercised; however, as exercising only some options is
-always no worse than excising all options and possibly selling the
-difference, we may assume all the options are exercised.
+In principle, the options
+need not be exercised at the time of their maturity; however, as we neglect transaction costs, exercising only some options is
+always no worse than exercising all options and possibly selling the
+difference, so we may assume all the options are exercised. The company may trade with the allowances and their derivatives freely; however, they may no take short positions.
 
-The company may fund their emission trading by loans with an interest
-rate $\varrho$. The insufficiency of cash at $T$ is penalized by
-a prohibitive interest rate $\iota$.
+%The company may fund their emission trading by loans with an interest
+%rate $\varrho$. The insufficiency of cash at $T$ is penalized by
+%a prohibitive interest rate $\iota$.
 
-The company is risk-averse minimizing the nested mean-CVaR
-risk measure, applied to the sum of profits $X_1,\dots,X_T$ from the production and the costs of emission trading.
+The company is risk-averse minimizing the discounted nested mean-CVaR
+risk measure, applied to the differences of profits from the production and the costs of emission trading. 
 
 \subsection*{Problem definition}
 
 
+The subject of decision is the way of optimal emission trading. In particular, at $t$, it is the number $\Delta s_{t}$ of
+the spot allowances purchased/sold at $t$, the numbers $$\Delta f_{t}=(\Delta f_{t}^{t+1},\dots,\Delta f_{t}^{T})$$
+of the futures with maturities $t+1,\dots,T$ purchased/sold, and the numbers 
 \[
-\min_{x_{t}\in\X_{t},0\leq t\leq T}\rho\left(-z_{0},\dots,-z_{T}\right)
-\]
-Here,
-\[
-\xi_{t}=(X_{t},Y_{t},P_{t},Q_{t},B_t)
-\]
-where $X_t\in \R_+$ is the profit from the production at time $t$, $Y_t \in \R_+$ are the emissions at $t$, $P_t\in\R_{+}$ and $Q_t\in\R_{+}^{T-t}$, $B_{t}\in\R_{+}^{T-t\times\kappa}$
-are spot prices, future-spot margins, option prices,
-respectively, at time $t$. In particular, $Q_t^\tau$ is the future-spot difference of the future with maturity at $\tau$, and $B_t^{\tau,i}$ is the premium paid at $t$ for the call option with the strike price $K_i$ with maturity $\tau$. 
-
-The decision variables are
-$$
-x_t=(s_{t},f_{t},\phi_{t},z_t,c_{t})
-$$
-where, $s_{t}$ is the number of
-the spot allowances held at $t$, $f_{t}=(f_{t}^{t+1},\dots,f_{t}^{T})$
-are the numbers of the futures with maturities $t+1,\dots,T$ held, and 
-\[
-\phi_{t}=\left[\begin{array}{ccc}
-\phi_{t}^{1,t+1} & \dots & \phi_{t}^{1,T}\\
+\Delta \phi_{t}=\left[\begin{array}{ccc}
+\Delta \phi_{t}^{t+1,1} & \dots & \Delta \phi_{t}^{T,1}\\
 \vdots &  & \vdots\\
-\phi_{t}^{\kappa,t+1} & \dots & \phi_{t}^{\kappa,T}
+\Delta \phi_{t}^{t+1,\kappa,} & \dots & \Delta \phi_{t}^{T,\kappa}
 \end{array}\right]
 \]
-are the numbers of call potions held. Further, $z_t$ is the cash-flow at and $c_t$ is the debt after $t$. 
+of the call options purchased/sold; here, $\Delta \phi_t^{\tau,i}$ denotes the number of call options with maturity $\tau$ and strike price $K_i$.
 
-Further, 
+At $t=0$, the income of the company is
+$$
+y_0=-P_0\Delta s_0- \sum_{\tau=1}^{T}\sum_{i=1}^{\kappa}B_0^{\tau,i}\Delta \phi_0^{\tau,i},
+$$
+while, at any $0<t\leq T$, the income is
+$$
+y_t  =X_t-P_t \Delta s_t-\sum_{i=1}^{\kappa}\min(P_t,K_{i})\phi_{t-1}^{t,i}
+-\sum_{\tau=0}^{t-1}Q_{\tau}^{t}\Delta f_{\tau}^t-\sum_{\tau=t+1}^{T}\sum_{i=1}^{\kappa}B_t^{\tau,i}\Delta\phi_t^{\tau-t,i}.
+$$
+Here, $f_t=\sum_{\tau=0}^t \Delta f^t_\tau$ and 
+$\phi_t=\sum_{\tau=0}^t \Delta \phi_\tau^t$. Further, $X_t\in \R_+$ is the profit from the production at time $t$, $Y_t \in \R_+$ is the amount of the emissions at $t$, $P_t\in\R_{+}$ is the spot price at time $t$, $Q_t^\tau \in \R_+$ is the price of the future with maturity $\tau$ at time $t$, and $B_t^{\tau,i}\in \R_+$ is the premium paid at $t$ for the call option with strike price $K_i$ and maturity $\tau$. 
+
+The aim of the company is to minimize $\rho(-y_0,\dots,-y_T)$
+where $\rho$ is the nested mean-CVaR criterion; in particular, for any real $c_0,\dots,c_T$,
+$$
+\rho(c_0,\dots,c_T)=\mu_1(\mu_2(\dots\mu_T(c_0+\varrho c_1+\dots+\varrho ^ T c_T)\dots));
+$$
+where $\mu_t(Z)=(1-\lambda)\E(Z|\F_{t-1})+\lambda \mathrm{CVaR}_\alpha(Z|\F_{t-1})$, $0\leq \lambda \leq 1$ and $0<\alpha<1$ are constants and $\varrho$ is a discount factor.
+
+Next we reformulate the decision problem into a form, which is more convenient for computation. 
+
+Denote $e_t$ the amount of the allowances held (immediately after) $t$. Clearly, $e_0=\Delta s_0$ and 
+\begin{equation}\label{eq:e}
+e_t = e_{t-1}+\Delta s_t+r_t +
+f_{t-1}^t+\sum_{i=1}^{\kappa}\phi_{t-1}^{t,i}-Y_t,
+\end{equation}
+As $\Delta f^t_\tau=f^t_\tau-f^t_{\tau-1}$, and similarly $\phi$, and as $\Delta s$ may be expressed from (\ref{eq:e}), we can alternatively take $e,f,\phi$ as decision variables. Further, as, at any $t$, the payment for futures with maturity $t$ is equal to $\sum_{\tau=0}^{t-1} b_\tau$ where $b_\tau \in  \F_\tau$, we may assume, without a change of the decision criterion's value, that $\varrho^{t-\tau}c_\tau$ is paid at each $0\leq \tau < T$ instead of the whole amount at $t$.
+
+Consequently, the problem may be reformulated as
+\[
+\min_{x_{t}\in\X_{t},x_t \in \F_t 0\leq t\leq T}\rho\left(-z_{0},\dots,-z_{T}\right)
+\]
+where $\F_t$ is the filtration induced by process
+$\xi_{t}=(X_{t},Y_{t},P_{t},Q_{t},B_t)$, where
+$$
+\X_{t}=\{(e_{t}, f_{t},\phi_{t}): e_0 \geq 0, f_0\geq0,
+\phi_{0} \geq0.\},\qquad 0\leq t < T,$$
+$$
+\X_T = \{e_T:e_T=0\},
+$$
+and
+$$
+z_0=-P_0e_0-\sum_{\tau=1}^{T}\varrho^{\tau}Q_0^{\tau} f_0^{\tau}-  \sum_{\tau=1}^{T}\sum_{i=1}^{\kappa}B_0^{\tau,i}\phi_0^{\tau,i}, 
+$$
 \begin{multline*}
-\X_{0}=\{(s_{0},f_{0},\phi_{0},z_0,c_{0}): s_0 \geq 0, f_0\geq0,
-\phi_{t} \geq0,
+z_t  =X_t-P_t 
+\left(
+e_t -e_{t-1}-r_t-
+f_{t-1}^t-\sum_{i=1}^{\kappa}\phi_{t-1}^{t,i}+Y_t
+\right)
 \\
-z_0=-P_0s_0-\sum_{\tau=1}^{T}(\rho^{\tau}P_0+Q_0^{\tau})f_0^{\tau}-  \sum_{\tau=1}^{T}\sum_{i=1}^{\kappa}B_0^{\tau,i}\phi_0^{\tau,i}, c_0 = [z_0]_-
-\}.
+-\sum_{i=1}^{\kappa}\min(P_t,K_{i})\phi_{t-1}^{t,i}
+-\sum_{\tau=t+1}^{T}\varrho^{\tau-t}Q_t^{\tau}(f_t^{\tau-t}
+-f_{t-1}^{\tau-t})
+\\-\sum_{\tau=t+1}^{T}\sum_{i=1}^{\kappa}B_t^{\tau,i}
+(\phi_t^{\tau-t,i}-\phi_{t-1}^{\tau-t,i}),\qquad 0<t\leq T.
 \end{multline*}
-For any $0<t<T$,
-\begin{multline*}
-\X_{t}(s_{t-1},f_{t-1}, \phi_{t-1}, c_{t-1})=\{(s_{t},f_{t},\phi_{t},z_t,c_{t})\in  \F_t: e_t \geq 0, f_t\geq0,
-\phi_{t} \geq0,
-\\
-z_t  =X_t-P_t [s_t+Y_t-(s_{t-1} + r_t +
-f_{t-1}^t+\sum_{i=1}^{\kappa}\phi_{t-1}^{t,i})
-]-\sum_{i=1}^{\kappa}\min(P_t,K_{i})\phi_{t-1}^{t,i}
- \\ \qquad\qquad-\sum_{\tau=t+1}^{T}(\rho^{\tau-t}P_t+Q_t^{\tau})\Delta f_t^{\tau-t}-\sum_{\tau=t+1}^{T}\sum_{i=1}^{\kappa}B_t^{\tau,i}\Delta\phi_t^{\tau-t,i}-\varrho c_{t-1},
-c_t =  [z_t-c_{t-1}]_-\}.
-\end{multline*}	
-Finally,
-$$
-\X_T(s_{T-1},f_{T-1}, \phi_{T-1}, c_{T-1}) 
-=
-\{z_T: z_T = e_T-\iota[e_T]_-\}
-$$
-where
-\begin{multline*}	 e_T= X_T-P_T [Y_T-(s_{T-1}+r_T
-+f_{T-1}^T+\sum_{i=1}^{\kappa}\phi_T^{T-1,i})]-\sum_{i=1}^{\kappa}\min(P_T,K_{i}) \phi_T^{T-1,i}
--\varrho c_{T-1}.
-\end{multline*}	
 
 
 
@@ -121,11 +128,11 @@ P_{t}=P_{0}\exp\left\{ \sum\nolimits_{\tau=1}^t u_{\tau} \right\},
 with $\sigma=0.439$ where $u_{1},\dots,u_T$ are i.i.d., and
 \[
 Q^\tau_{t}=P_t\exp\{(\tau-t)(0.00974+v^\tau_{t})\},\qquad v^\tau_{t}\sim \mathcal{N}(0,\varsigma^2),\qquad 1\leq t< \tau,\quad 1\leq \tau \leq T,
-\]
+	\]
 with $\varsigma=0.010$ where $v^2_1,v_1^3,v_2^3,\dots$ are i.i.d., independent of $u_1,\dots,u_T$.
 
 The initial prices are equal to 
-$$P_0=7.77, \quad Q^1_0=0.04,\quad Q^2_0=0.1,\quad Q^3_0=0.2$$ %markets.businessinsider.com
+$$P_0=7.77, \quad Q^1_0=7.81,\quad Q^2_0=7.87,\quad Q^3_0=7.97$$ %markets.businessinsider.com
 
 Option prices $B^{\tau,i}_t$ are computed by the Black-Scholes formula with the implied volatility being a quadratic function of the strike price relative to the spot price. The shape of the function, depicted in Picture XX, has been estimated using 110 observations of actual option prices on ???market. As the risk-less rate ??? was taken. 
 
