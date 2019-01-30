@@ -1,6 +1,7 @@
 #include "zsk.h"
-const double varrho	=	0.04		;
-const double iota	=	0.15		;
+
+
+const double varrho	=	0.94		;
 
 const vector<vector<double>> epsvsq	={	{439.901,679.738}	,
         {679.738,4834.49}	}	;
@@ -25,14 +26,19 @@ const vector<double> v0	={	0.005134799472039	,
         0.006393949024878	,
         0.008471442807523	}	;
 
-
 const double rf	=	0.01		;
 const double bsc	=	0.678		;
 const double bsl	=	-0.00964		;
 const double bsq	=	0.00234		;
 
-const double strikes[]	={	10	,
+const double K[]	={	10	,
         14	,
         18	,
         22	,
         26	}	;
+
+const double maxkappa	=	5		;
+
+const double r[]	={	132218	,
+        129555	,
+        126884	}	;
