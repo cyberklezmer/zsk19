@@ -144,7 +144,7 @@
 
 \dochead{}
 
-\title{Towards Optimal Emissions Portfolio in Stochastic Multi-stage Environment using the SDDP Algorithm}
+\title{Towards Optimal Emissions Portfolio via Multi-stage Stochastic Programming using the Markov SDDP Algorithm}
 
 %\author{Franti\v sek Zapletal}
 \address{Czech Academy of Sciences, Institute of Information Theory and Automation, Pod Vod\' arenskou v\v e\v z\' i 4, Prague, Czech Republic, smid@cas.utia.cz \fnref{label2} }
@@ -153,7 +153,7 @@
 
 \begin{abstract}
 
-Emissions trading within the Emissions Trading Scheme of the European Union (EU ETS) influences European industrial companies since 2005. The companies must choose their strategy how to reduce the costs of emissions allowances as possible. The changing system’s conditions and volatile price of allowances make this decision very tough. Despite several studies devoted to the relationship between the EU ETS and companies have already been published, there is still a gap in this field. Namely, the published studies have been substantially simplified so far, e.g., by ignoring the risk of driving parameters (prices of products, or allowances), omiting existence of derivatives on allowances, or taking only one decision period into consideration. In this paper, we provide a complex stochastic optimization model, which avoids the mentioned simplifications. The resulting optimization model is a large scale stochastic optimization model requiring an efficient algorithm to be solved in reasonable time. Namely, we use the Stochastic Dual Dynamic Programming algorithm (SDDP) to find the optimal solution. The model is verified using the data of a real-life industrial company for XX periods. 
+Emissions trading within the Emissions Trading Scheme of the European Union (EU ETS) influences European industrial companies since 2005. The companies must choose their strategy how to reduce the costs of emissions allowances as possible. The changing system’s conditions and volatile price of allowances make this decision very tough. Despite several studies devoted to the relationship between the EU ETS and companies have already been published, there is still a gap in this field. Namely, the published studies have been substantially simplified so far, e.g., by ignoring the risk of driving parameters (prices of products, or allowances), omiting existence of derivatives on allowances, or taking only one decision period into consideration. In this paper, we provide a complex stochastic optimization model, which avoids the mentioned simplifications. The resulting optimization model is a large scale stochastic optimization model requiring an efficient algorithm to be solved in reasonable time. Namely, we use the Markov Stochastic Dual Dynamic Programming algorithm (MSDDP) to find the optimal solution. The model is verified using the data of a real-life industrial company. 
 
 %The results show that ... TBD.
 
@@ -215,7 +215,7 @@ Zapletal, \v Sm\' id and Kopa (2019)& d (options)\\\hline
 
 Tab. \ref{tab1} provides a review of the available models and their simplifying assumprions, according to the list above. The simplifications can stem from two main reasons. First, the authors established their model under the conditions valid at that time considering both, rules of the EU ETS and state of economy. For instance, financial derivatives could not be used by companies in the beginning of the EU ETS, banking of allowances was not allowed between the first (2005-2008) and the second (2009-2012) trading phase, see \citet{zapletal3}, and during the deep economic crisis the companies generated rather the profit than additional loss from emissions trading, due to very low levels of demands and EUA price. Second, the authors were aware of all the mentioned factors, but they have decided for simplifications just to keep the size of the models small enough to be still solvable, like in the case of \citet{anor}.
 
-In this paper, we establish a complex stochastic optimization model involving the factors (a)-(d). This model is big enough to be solved using the standard algorithms of sochastic programming. Therefore, we apply the Stochastic Dual Dynamic algorithm, which solves a sample average approximation of large stochastic programming models efficiently, see \citet{pereira1991multi}. Moreover, we work with the latest available input data (till 12/2018), which even increase credibility of the results. 
+In this paper, we establish a complex stochastic optimization model involving the factors (a)-(d). This model is big enough to be solved using the standard algorithms of stochastic programming. Therefore, we apply the Stochastic Dual Dynamic algorithm, which is known to be able to of large stochastic programming models efficiently, see \citet{pereira1991multi}. In particular, we use its modification for the case of Hidden Markov Models \citep{philpott2013solving}. Moreover, we work with the latest available input data (till 12/2018), which even increase credibility of the results. 
 
 The proposed model is applied to one real-world Czech steel company, for which we explore the impact of the factors (a)-(d) on costs of emissions trading and the associated financial risk. Furthermore, we focus on optimal portfolio of emission allowances and impact of the emissions trading on production of the modelled company. This analysis is also supported by sensitivity analysis performed for the selected inpiut values. 
 
@@ -388,6 +388,15 @@ $$
 X_0 = 2744.83,\qquad Y_0 = 18982.64
 $$
 were obtained by a year-ahead forecast in (\ref{xymodel}).
+
+\section{Solution}
+
+As it is clear from the previous Section, random parameters $P$, $X$ and $Y$ are time dependent rather than conditionally independent given some Markov chain, as it is required for the Markov SDDP algorithm. As neither $X_t$ nor  $Y_t$ are multiplied by a decision variable in the constraints of the problem, their time-dependence may be circumvented by regarding them as decision variables, constrained by (\ref{xymodel}); the i.i.d. residuals from (\ref{xymodel}) then become new random parameter. As $P$ is multiplied by other decision variables in the constraints, this trick cannot be used here. Instead, we approximate $P$ by a Hidden Markov Process according to  \citep{smid2019solution}. As the residuals from (\ref{xymodel}) are i.i.d. and as  $Q^\bullet_t$ -- the remaining random parameters -- are functions of $P$ and i.i.d. series, it follows that the vector of the new random parameters is a Hidden Markov chain process, hence eligible for Markov SDDP. For more details, see \citet{smid2019solution}.
+
+
+
+
+\section*{References}
 
 \bibliography{bibl}
 
