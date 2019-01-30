@@ -1,19 +1,227 @@
-%% LyX 2.3.1 created this file.  For more info, see http://www.lyx.org/.
-%% Do not edit unless you really know what you are doing.
-\documentclass[english]{article}
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage{amsmath}
+
+% Template for Elsevier CRC journal article
+% version 1.2 dated 09 May 2011
+
+% This file (c) 2009-2011 Elsevier Ltd.  Modifications may be freely made,
+% provided the edited file is saved under a different name
+
+% This file contains modifications for Procedia Computer Science
+% but may easily be adapted to other journals
+
+% Changes since version 1.1
+% - added "procedia" option compliant with ecrc.sty version 1.2a
+%   (makes the layout approximately the same as the Word CRC template)
+% - added example for generating copyright line in abstract
+
+%-----------------------------------------------------------------------------------
+
+%% This template uses the elsarticle.cls document class and the extension package ecrc.sty
+%% For full documentation on usage of elsarticle.cls, consult the documentation "elsdoc.pdf"
+%% Further resources available at http://www.elsevier.com/latex
+
+%-----------------------------------------------------------------------------------
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                                          %%
+%% Important note on usage                                  %%
+%% -----------------------                                  %%
+%% This file should normally be compiled with PDFLaTeX      %%
+%% Using standard LaTeX should work but may produce clashes %%
+%%                                                          %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% The '3p' and 'times' class options of elsarticle are used for Elsevier CRC
+%% Add the 'procedia' option to approximate to the Word template
+%\documentclass[3p,times,procedia]{elsarticle}
+\documentclass[3p,times]{elsarticle}
+
+%% The `ecrc' package must be called to make the CRC functionality available
+\usepackage{ecrc}
+\usepackage{subfigure}  
+
+%% The ecrc package defines commands needed for running heads and logos.
+%% For running heads, you can set the journal name, the volume, the starting page and the authors
+
+%% set the volume if you know. Otherwise `00'
+\volume{00}
+
+%% set the starting page if not 1
+\firstpage{1}
+
+%% Give the name of the journal
+\journalname{European Journal of Operational Research}
+
+%% Give the author list to appear in the running head
+%% Example \runauth{C.V. Radhakrishnan et al.}
+\runauth{}
+
+%% The choice of journal logo is determined by the \jid and \jnltitlelogo commands.
+%% A user-supplied logo with the name <\jid>logo.pdf will be inserted if present.
+%% e.g. if \jid{yspmi} the system will look for a file yspmilogo.pdf
+%% Otherwise the content of \jnltitlelogo will be set between horizontal lines as a default logo
+
+%% Give the abbreviation of the Journal.  Contact the journal editorial office if in any doubt
+\jid{procs}
+
+%% Give a short journal name for the dummy logo (if needed)
+\jnltitlelogo{EJOR}
+
+%% Provide the copyright line to appear in the abstract
+%% Usage:
+%   \CopyrightLine[<text-before-year>]{<year>}{<restt-of-the-copyright-text>}
+%   \CopyrightLine[Crown copyright]{2011}{Published by Elsevier Ltd.}
+%   \CopyrightLine{2011}{Elsevier Ltd. All rights reserved}
+\CopyrightLine{2019}{Published by Elsevier Ltd.}
+
+%% Hereafter the template follows `elsarticle'.
+%% For more details see the existing template files elsarticle-template-harv.tex and elsarticle-template-num.tex.
+
+%% Elsevier CRC generally uses a numbered reference style
+%% For this, the conventions of elsarticle-template-num.tex should be followed (included below)
+%% If using BibTeX, use the style file elsarticle-num.bst
+
+%% End of ecrc-specific commands
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% The amssymb package provides various useful mathematical symbols
+\usepackage{graphicx}
+%% `Elsevier LaTeX' style
+%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{amssymb}
-\usepackage{babel}
-\usepackage{pgf}
+\usepackage{amsmath}
+\usepackage{natbib}
+%\usepackage{apalike}
+\usepackage{enumerate}
+\usepackage{xcolor}
+\bibliographystyle{apalike}
+
+\usepackage[figuresright]{rotating}
+\usepackage{tikz}
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+   \node[shape=circle,draw,inner sep=0.9pt] (char) {#1};}}
+
+
+\usepackage{enumitem}
+\newlist{steps}{enumerate}{1}
+\setlist[steps, 1]{label = \textit{Step \arabic*:}}
+% put your own definitions here:
+%   \newcommand{\cZ}{\cal{Z}}
+
+%   ...
+
+% add words to TeX's hyphenation exception list
+%\hyphenation{author another created financial paper re-commend-ed Post-Script}
+
+% declarations for front matter
+
 \begin{document}
+
+\begin{frontmatter}
+
+%% Title, authors and addresses
+
+%% use the tnoteref command within \title for footnotes;
+%% use the tnotetext command for the associated footnote;
+%% use the fnref command within \author or \address for footnotes;
+%% use the fntext command for the associated footnote;
+%% use the corref command within \author for corresponding author footnotes;
+%% use the cortext command for the associated footnote;
+%% use the ead command for the email address,
+%% and the form \ead[url] for the home page:
+%%
+%% \title{Title\tnoteref{label1}}
+%% \tnotetext[label1]{}
+\author{Martin \v Sm\' id}\corref{cor1}\fnref{label1}
+\author{Franti\v sek Zapletal\fnref{label2}}
+%% \ead{email address}
+%% \ead[url]{home page}
+%% \fntext[label2]{}
+%% \cortext[cor1]{}
+%% \address{Address\fnref{label3}}
+%% \fntext[label3]{}
+
+\dochead{}
+
+\title{Towards Optimal Emissions Portfolio in Stochastic Multi-stage Environment using the SDDP Algorithm}
+
+%\author{Franti\v sek Zapletal}
+\address{Czech Academy of Sciences, Institute of Information Theory and Automation, Pod Vod\' arenskou v\v e\v z\' i 4, Prague, Czech Republic, smid@cas.utia.cz \fnref{label2} }
+\address{V\v SB -- Technical University of Ostrava, Sokolska 33, Ostrava, Czech Republic,
+                frantisek.zapletal@vsb.cz \fnref{label2} }
+
+\begin{abstract}
+
+Emissions trading within the Emissions Trading Scheme of the European Union (EU ETS) influences European industrial companies since 2005. The companies must choose their strategy how to reduce the costs of emissions allowances as possible. The changing system’s conditions and volatile price of allowances make this decision very tough. Despite several studies devoted to the relationship between the EU ETS and companies have already been published, there is still a gap in this field. Namely, the published studies have been substantially simplified so far, e.g., by ignoring the risk of driving parameters (prices of products, or allowances), omiting existence of derivatives on allowances, or taking only one decision period into consideration. In this paper, we provide a complex stochastic optimization model, which avoids the mentioned simplifications. The resulting optimization model is a large scale stochastic optimization model requiring an efficient algorithm to be solved in reasonable time. Namely, we use the Stochastic Dual Dynamic Programming algorithm (SDDP) to find the optimal solution. The model is verified using the data of a real-life industrial company for XX periods. 
+
+%The results show that ... TBD.
+
+
+%Nezapomen hned tady rict, ze clanek navazuje na Tashizaku s Bertrandem
+\end{abstract}
+
+\begin{keyword}
+emissions trading \sep EU ETS \sep stochastic programming \sep multi-stage \sep SDDP \sep EUA.
+%% PACS codes here, in the form: \PACS code \sep code
+
+%% MSC codes here, in the form: \MSC code \sep code
+%% or \MSC[2008] code \sep code (2000 is the default)
+
+\end{keyword}
+
+\end{frontmatter}
+
+
 \global\long\def\E{\mathbb{E}}%
 \global\long\def\R{\mathbb{R}}%
 \global\long\def\F{\mathcal{F}}%
 \global\long\def\charf{\mathbf{1}}%
 \global\long\def\barxi{\overline{\xi}}%
 \global\long\def\X{\mathcal{X}}%
+
+\section{Introduction}
+\label{sec:1}
+
+Emissions trading within the European Emissions Trading System (EU ETS) is the main tool of the EU environmental policy since 2005. Rules and settings of the EU ETS are given by several EU directives, namely \citet{DIR1}, \citet{DIR4}, \citet{DIR3} and \citet{DIR9}. This system is based on obligation for companies to use emission allowances (EUAs) to cover their CO$_2$ emissions, thus it is a source of additional financial risk and costs related with trading the allowances. Many studies have been already devoted to analysis of the EU ETS' impact on companies with the same results -- this effect cannot be ommited and should be involved in strategic planning, see \citet{zhang},\citet{SMI}, or \citet{anor}. This is even enhanced by several external shocks, changes in the trading rules for the next trading periods, and trends in heavy industry, which, all together, resulting in rapid increase in allowance prices during 2017 and 2018.
+
+Up to now, each published model optimizing the behaviour of industrial companies regarding the emissions trading has always been simplified at least at one important factor identified by \citet{anor}:
+\begin{enumerate}
+\item[a)] multi-period environment allowing for use of banking (transfering the allowances to following time periods);
+\item[b)] uncertain demand for products (the demand is a crucial factor for production, and thus for amount of emissions too);
+\item[c)] uncertain EUA price (since the EU ETS is a cap-and-trade system, the allowance price is essential);
+\item[d)] involving all available derivatives for allowances (futures and options).
+\end{enumerate}     
+
+\begin{table}[htbp]               
+\centering
+\begin{tabular}{l|l}\hline
+Authors & Omitted factors\\ \hline
+Lemathe and Balakrishnan (2005)& a,b,c,d\\
+Rong and Landhelma (2007)& d\\
+Sirikitputtisak et al. (2009)& b,c,d\\
+Mirzaesmaeeli et al. (2010)& b,c,d\\
+Gong and Zhou (2013) & d\\
+Tang and Song (2013)& c,d\\
+Zhang and Xu (2013)& a,c,d\\
+Zapletal and \v Sm\' id (2016)& a,d \\
+Zapletal, \v Sm\' id and Kopa (2019)& d (options)\\\hline
+
+\end{tabular}
+\caption{The review on published optimization models devoted to company's behaviour regarding the emissions trading}
+\label{tab1}
+\end{table}
+
+
+Tab. \ref{tab1} provides a review of the available models and their simplifying assumprions, according to the list above. The simplifications can stem from two main reasons. First, the authors established their model under the conditions valid at that time considering both, rules of the EU ETS and state of economy. For instance, financial derivatives could not be used by companies in the beginning of the EU ETS, banking of allowances was not allowed between the first (2005-2008) and the second (2009-2012) trading phase, see \citet{zapletal3}, and during the deep economic crisis the companies generated rather the profit than additional loss from emissions trading, due to very low levels of demands and EUA price. Second, the authors were aware of all the mentioned factors, but they have decided for simplifications just to keep the size of the models small enough to be still solvable, like in the case of \citet{anor}.
+
+In this paper, we establish a complex stochastic optimization model involving the factors (a)-(d). This model is big enough to be solved using the standard algorithms of sochastic programming. Therefore, we apply the Stochastic Dual Dynamic algorithm, which solves a sample average approximation of large stochastic programming models efficiently, see \citet{pereira1991multi}. Moreover, we work with the latest available input data (till 12/2018), which even increase credibility of the results. 
+
+The proposed model is applied to one real-world Czech steel company, for which we explore the impact of the factors (a)-(d) on costs of emissions trading and the associated financial risk. Furthermore, we focus on optimal portfolio of emission allowances and impact of the emissions trading on production of the modelled company. This analysis is also supported by sensitivity analysis performed for the selected inpiut values. 
+
+%The results show that...TBD.
+
+%The rest of this paper is organized as follows. 
 
 
 \section*{Description of the problem}
@@ -106,10 +314,10 @@ f_{t-1}^t-\sum_{i=1}^{\kappa}\phi_{t-1}^{t,i}+Y_t
 \right)
 \\
 -\sum_{i=1}^{\kappa}\min(P_t,K_{i})\phi_{t-1}^{t,i}
--\sum_{\tau=t+1}^{T}\varrho^{\tau-t}Q_t^{\tau}(f_t^{\tau}
--f_{t-1}^{\tau})
+-\sum_{\tau=t+1}^{T}\varrho^{\tau-t}Q_t^{\tau}(f_t^{\tau-t}
+-f_{t-1}^{\tau-t})
 \\-\sum_{\tau=t+1}^{T}\sum_{i=1}^{\kappa}B_t^{\tau,i}
-(\phi_t^{\tau,i}-\phi_{t-1}^{\tau,i}),\qquad 0<t\leq T.
+(\phi_t^{\tau-t,i}-\phi_{t-1}^{\tau-t,i}),\qquad 0<t\leq T.
 \end{multline*}
 
 
@@ -138,7 +346,24 @@ Option prices $B^{\tau,i}_t$ are computed by the Black-Scholes formula with the 
 
 \pgfimage[width=7cm]{smile}
 
-Our model of profits $X$ and emissions $Y$ was estimated using their monthly hypothetical historical values from 2014 to 2016, which were constructed as follows: TBD FRANTA.
+Our model of profits $X$ and emissions $Y$ was estimated using their monthly hypothetical historical values from 2014 to 2016, which were constructed as follows.
+
+According to the expert in steel industry, the unit profit for steel products is influenced mainly by costs of inputs, namely, costs of coal, scrap and iron ore. The expertise showed that these three inputs represent approximately three quarters of variable costs of a steel company. Since we know the real values of selling prices and variable costs in 2014, we use the historical market data on costs of the mentioned three inputs, price indices for flat products, long products and steel semiproducts to estimate the values of unit profits, see (\ref{XX}).
+
+\begin{equation}
+x_{i,t}=p_i^* \cdot \bar{P}_t^{\bullet} - c_i^* \cdot \bigl(\rho^{O}\cdot\bar{C}_t^{O}+\rho^{S}\cdot\bar{C}_t^{S}+\rho^{I}\cdot\bar{C}_t^{I}+(1-\rho^{S}-\rho^{O}-\rho^{I})\bigr)
+\label{XX}
+\end{equation}
+$\bullet\in\{F,L,M\}$ represents type of a steel product -- flat, long, or semiproduct, respectively; $\rho^S,\rho^O,\rho^I$ stand for a share of influence of scrap, coal and iron ore on total variable costs, respectively; $\bar{C}_t^{S},\bar{C}_t^{O},\bar{C}_t^{I}$ are costs levels for scrap, coal and iron ore at time $t$, adjusted with respect to the last known real value using (\ref{XX2}); $\bar{P}_t^{\bullet}$ is a selling price of particular steel product type at time $t$, adjusted in the same manner as the costs ($\bar{C}_t$); $p_i^*$ and $c_i^*$ are the last known real values of selling prices and variables costs of particular steel products of the modelled company (in 2014). 
+
+\begin{equation}
+\bar{C}_t^{\circ}=\frac{C_t^{\circ}}{c^{\circ *}},
+\label{XX2}
+\end{equation}
+where $c^{\circ *}$ is a price level for commodity $\circ\in\{S,C,O\}$ in 12/2014 and $C_t^{\bullet}$ stands for a price level of this commodity at time $t$.
+
+The time series of prices come from the Czech Steel Union's database. The expert has recommended to set $\rho^S=\rho^O=\rho^I=0.25$. This means that one quarter of variable costs of production is influenced by other factors (than the three considered raw materials), like labour costs, etc. In this study, this one quarter is taken as constant in time for the sake of simplicity.  
+
 
 As all the correlations of any of $X_t,Y_t$ with any of $P_t$, $P_{t-1}$  and correlations of any of $\Delta X_t,\Delta Y_t$ with any of $\Delta P_t$, $\Delta P_{t-1}$ are insignificant, we model $X,Y$ alone, independently of $P$. The time series plots and xy--plots of processes $X_t,Y_t$ and the processes of their first differences can be seen in Figures:
 
@@ -164,7 +389,13 @@ X_0 = 2744.83,\qquad Y_0 = 18982.64
 $$
 were obtained by a year-ahead forecast in (\ref{xymodel}).
 
+\bibliography{bibl}
+
 \end{document}
+
+PEREIRA, M. V. F. and PINTO, L. M. V. G. Multi-stage stochastic opti-
+mization applied to energy planning. Mathematical Programming. 1991, vol.
+52, pp. 359{375.
 
 Oba modely znovu odhadnu, ale asi by to chtělo z čerstvějších dat, takže bych poprosil spoty a futury až do konce 2017, nemusejí být moc do minulosti, stačí rok dva (denních dat)
 
@@ -197,4 +428,4 @@ Ve všech případech může být reziduum korelované (takže přírůstky $X$ 
 
 \end{itemize}
 
-\end{document}
+
