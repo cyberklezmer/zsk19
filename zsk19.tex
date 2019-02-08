@@ -1,4 +1,4 @@
-
+			
 % Template for Elsevier CRC journal article
 % version 1.2 dated 09 May 2011
 
@@ -91,6 +91,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{amssymb}
 \usepackage{amsmath}
+\usepackage{amsthm}
 \usepackage{natbib}
 %\usepackage{apalike}
 \usepackage{enumerate}
@@ -346,7 +347,55 @@ Option prices $B^{\tau,i}_t$ are computed by the Black-Scholes formula with the 
 
 \pgfimage[width=7cm]{smile}
 
-Our model of profits $X$ and emissions $Y$ was estimated using their monthly hypothetical historical values from 2014 to 2016, which were constructed as follows.
+Our model of yearly profits $X$ (ih thousands of EUR) and emissions $Y$ (in metric tonnes) was estimated using their monthly hypothetical historical values from 2014 to 2016, as 
+\begin{equation}
+\left[X_t
+\atop
+Y_t
+\right]
+=\left[37,847.73
+\atop
+232,561.57
+\right]+
+\left[
+\begin{array}{cc}
+0.6981 & -0.1211 \\
+1.712 & -0.2638
+\end{array}
+\right]
+\left[X_{t-1}
+\atop
+Y_{t-1}
+\right]
+ + e_t,
+\end{equation}
+where $e_1,e_2,\dots$ are i.i.d. centred with standard deviations $7,968$ and $25,499$ and with correlation $0.7368$. As the initial values,
+$$
+X_0 = 33,735,\qquad Y_0 = 246,974,
+$$
+was taken.  See Appendix for the construction of the model. 
+
+
+		
+\section{Solution}
+
+As it is clear from the previous Section, random parameters $P$, $X$ and $Y$ are time dependent rather than conditionally independent given some Markov chain, as it is required for the Markov SDDP algorithm. As neither $X_t$ nor  $Y_t$ are multiplied by a decision variable in the constraints of the problem, their time-dependence may be circumvented by regarding them as decision variables, constrained by (\ref{xymodel}); the i.i.d. residuals from (\ref{xymodel}) then become new random parameter. As $P$ is multiplied by other decision variables in the constraints, this trick cannot be used here. Instead, we approximate $P$ by a Hidden Markov Process according to  \citep{smid2019solution}. As the residuals from (\ref{xymodel}) are i.i.d. and as  $Q^\bullet_t$ -- the remaining random parameters -- are functions of $P$ and i.i.d. series, it follows that the vector of the new random parameters is a Hidden Markov chain process, hence eligible for Markov SDDP. For more details, see \citet{smid2019solution}.
+
+
+
+
+\section*{References}
+
+\bibliography{bibl}
+
+\appendix
+
+\def\indep{\perp\hspace{-2mm}\perp}
+\def\E{\mathbb{E}}
+\def\var{\mathrm{var}}
+\newtheorem{lemma}{Lemma}
+
+\subsection{Model for Production Income and Emissions}
 
 According to the expert in steel industry, the unit profit for steel products is influenced mainly by costs of inputs, namely, costs of coal, scrap and iron ore. The expertise showed that these three inputs represent approximately three quarters of variable costs of a steel company. Since we know the real values of selling prices and variable costs in 2014, we use the historical market data on costs of the mentioned three inputs, price indices for flat products, long products and steel semiproducts to estimate the values of unit profits, see (\ref{XX}).
 
@@ -363,9 +412,12 @@ $\bullet\in\{F,L,M\}$ represents type of a steel product -- flat, long, or semip
 where $c^{\circ *}$ is a price level for commodity $\circ\in\{S,C,O\}$ in 12/2014 and $C_t^{\bullet}$ stands for a price level of this commodity at time $t$.
 
 The time series of prices come from the Czech Steel Union's database. The expert has recommended to set $\rho^S=\rho^O=\rho^I=0.25$. This means that one quarter of variable costs of production is influenced by other factors (than the three considered raw materials), like labour costs, etc. In this study, this one quarter is taken as constant in time for the sake of simplicity.  
+Highly improbable negative observations are truncated to zero, if they appear during the computation. 
 
 
-As all the correlations of any of $X_t,Y_t$ with any of $P_t$, $P_{t-1}$  and correlations of any of $\Delta X_t,\Delta Y_t$ with any of $\Delta P_t$, $\Delta P_{t-1}$ are insignificant, we model $X,Y$ alone, independently of $P$. The time series plots and xy--plots of processes $X_t,Y_t$ and the processes of their first differences can be seen in Figures:
+TBD introduce y, TBD say that x is in thousands. TBD say that we need yearly data.
+
+As all the correlations of any of $x_t,y_t$ with any of $p_t$, $p_{t-1}$  and correlations of any of $\Delta x_t,\Delta y_t$ with any of $\Delta P_t$, $\Delta P_{t-1}$ are insignificant, we model $X,Y$ alone, independently of $P$. The time series plots and xy--plots of processes $x_t,y_t$ and the processes of their first differences can be seen in Figures:
 
 \pgfimage[width=5cm]{tsplot}
 \pgfimage[width=5cm]{dtsplot}
@@ -374,67 +426,120 @@ As all the correlations of any of $X_t,Y_t$ with any of $P_t$, $P_{t-1}$  and co
 \pgfimage[width=5cm]{xyplot}
 \pgfimage[width=5cm]{dxyplot}
 
-In can be clearly seen that the values of $X_t$ and $Y_t$ ``go along'' as well as their first differences, so it is worth to model their evolution jointly. As the ADF tests rejected unit root hypothesis for both the series, we chose VAR model with the single lag to fit their time evolution:
+In can be clearly seen that the values of $x_t$ and $y_t$ ``go along'' as well as their first differences, so it is worth to model their evolution jointly. As the ADF tests rejected unit root hypothesis for both the series, we chose VAR model with the single lag to fit their time evolution:
 \begin{equation}\label{xymodel}
-\begin{aligned}
-X_t&=2306	.45 +   1.26237 X_{t-1}  -0.158943 Y_{t-1} + \epsilon_t \\
-Y_t&=12852.2  +   2.24683  X_{t-1} + \varepsilon_t
-\end{aligned}
+z_t=C + A z_{t-1} + \varepsilon_t,\qquad 
+z_t = \left[x_t \atop y_t\right],
+\qquad C = \left[2306	.45\atop 12852.2\right],
+\qquad 
+A=\left[\begin{array}{cc}
+1.26237 &  -0.158943\\
+2.24683 & 0 
+\end{array}\right]
 \end{equation}
-with $\mathrm{stdev}(\epsilon_1)=809.6647$, $\mathrm{stdev}(\varepsilon_1)=4882.004$ and $\mathrm{corr}(\epsilon_1,\varepsilon_1)=0.907$. Highly improbable negative observations are truncated to zero, if they appear during the computation. 
+where $\mathrm{stdev}(\varepsilon^1_1)=809.6647$, $\mathrm{stdev}(\varepsilon^2_1)=4882.004$ and $\mathrm{corr}(\varepsilon^1_1,\varepsilon^2_1)=0.907$.  Note that the model reflects a natural delay of the emissions after the production. (TBD je to takhle?)
 
-The initial values 
+For the process of yearly sums:
 $$
-X_0 = 2744.83,\qquad Y_0 = 18982.64
+Z_s = \left[X_s\atop Y_s\right]
+\qquad 
+X_s = \sum_{\tau = 12(s-1)}^{12s} x_\tau,
+\quad
+Y_s =\sum_{\tau = 12(s-1)}^{12s} y_\tau
 $$
-were obtained by a year-ahead forecast in (\ref{xymodel}).
+we have that 
+$$
+Z_s|Z_{s-1},\dots,Z_1 = \mathcal{N}
+\left(\mu_s,V_s\right)
+$$
+where
+$$
+\mu_s = D + E\E(z_{12(s-1)}|Z_{s-1},\dots,Z_1),
+\qquad 
+D 
+=\left( \sum_{k=0}^{11} (12-k) A^k\right) C
+% = \sum_{k=0}^{11}  ( \sum_{i=0}^{11-k} A^{i} ) C
+% = \sum_{k=0}^{11}  ( \sum_{i=0}^{k} A^{i} ) C,
+\qquad 
+E = \sum_{k=1}^{12} A^{k},
+$$
+$$
+V_s = E\var(z_{12(s-1)}|Z_{s-1},\dots,Z_1)E'+W,,
+\qquad
+W = \sum_{i=0}^{11}F_{i}\var(\varepsilon_1)F'_{i},
+\qquad 
+F_k= \sum_{i=0}^k A^i.
+$$
 
-\section{Solution}
 
-As it is clear from the previous Section, random parameters $P$, $X$ and $Y$ are time dependent rather than conditionally independent given some Markov chain, as it is required for the Markov SDDP algorithm. As neither $X_t$ nor  $Y_t$ are multiplied by a decision variable in the constraints of the problem, their time-dependence may be circumvented by regarding them as decision variables, constrained by (\ref{xymodel}); the i.i.d. residuals from (\ref{xymodel}) then become new random parameter. As $P$ is multiplied by other decision variables in the constraints, this trick cannot be used here. Instead, we approximate $P$ by a Hidden Markov Process according to  \citep{smid2019solution}. As the residuals from (\ref{xymodel}) are i.i.d. and as  $Q^\bullet_t$ -- the remaining random parameters -- are functions of $P$ and i.i.d. series, it follows that the vector of the new random parameters is a Hidden Markov chain process, hence eligible for Markov SDDP. For more details, see \citet{smid2019solution}.
+\begin{proof} For any $t>1$ and $k>1$, we have,
+$$z_{t+1}=C + A z_{t} + \varepsilon_{t+1}$$
+$$z_{t+2}=(I+A)C + A^2 z_{t} + \varepsilon_{t+2}+ A \varepsilon_{t+1}$$
+$$\dots$$
+$$
+z_{t+k} = (I+\dots+A^{k-1}) C + A^k z_t + \varepsilon_{t+k} + \dots + A^{k-1} \varepsilon_{t+1}.
+$$
+Summing this, we get 
+$$
+Z_s = D + E z_{12(s-1)}+\eta_s, 
+\qquad
+\eta_s = \sum_{k=0}^{11} F_k \varepsilon_{12s-k} 
+$$
 
 
-
-
-\section*{References}
-
-\bibliography{bibl}
-
+Clearly, $(Z_1,\dots,Z_s)$ is regular Gaussian, so $Z_s|Z_{s-1},\dots,Z_1$ is  Gaussian with
+$$
+\E(Z_{s}|Z_{s-1},\dots,Z_1)=
+\E(D+Ez_{(s-1)12}+\eta_s|Z_{s-1},\dots,Z_1)
+=D + E\E(z_{(s-1)12}|Z_{s-1},\dots,Z_1),
+$$
+$$
+\var(Z_{s}|Z_{s-1},\dots,Z_1)=
+\var(D+Ez_{(s-1)12}+\eta_s|Z_{s-1},\dots,Z_1)
+=\var(\eta_s)+E\var(z_{(s-1)12}|Z_{s-1},\dots,Z_1) E'
+$$
+(note that $\eta_s\indep (Z_1,\dots,Z_{s-1})$). Finally, as $\varepsilon_t$ are i.i.d, we get 
+$
+\var(\eta_s) = \sum_{k=0}^{11} F_k \var(\varepsilon_1) F_k'.
+$
+\end{proof}
+In our case, 
+$$
+D=\left[37,847.23
+\atop
+232,561.57
+\right],
+\qquad
+E = 
+\left[
+\begin{array}{cc}
+8.37724 & -1.45331 \\
+20.54408 & -3.16534
+\end{array}
+\right],
+\qquad 
+W = w' 
+\left[
+\begin{array}{cc}
+1 & 0.7369 \\
+0.7369 & 1
+\end{array}
+\right]w,
+\qquad 
+w =
+\left[7,967.99
+\atop
+25,499.00
+\right],
+$$
+The computation of  the conditional expectation and the conditional variance of $z_{12(s-1)}$ is possible (by the formula for the conditional distribution f a Gaussian subvector), yet complicated. Thus and as the influence of these term is not great, we use an approximation $\E(z_{12(s-1)}|Z_{s-1},\dots,Z_1) \doteq \E(\frac{Z_{s-1}}{12}|Z_{s-1},\dots,Z_1) =\frac{Z_{s-1}}{12}$, $\var(z_{12(s-1)}|Z_{s-1},\dots,Z_1)\doteq \var(\frac{Z_{s-1}}{12}|Z_{s-1},\dots,Z_1)=0$ to get 
+$$
+Z_s =D+\frac{1}{12} E Z_{s-1} + e_s,\qquad e_s \sim \mathcal{N} (0,W)
+$$
+As the initial values (corresponding to the beginning of 2018) we take the linear forecast of $Z_0 = \sum_{k=1}^{12} z_{t+l}$ in the monthly model (\ref{xymodel}),  where $t$ corresponds to the beginning of $2017$.
 \end{document}
 
 PEREIRA, M. V. F. and PINTO, L. M. V. G. Multi-stage stochastic opti-
 mization applied to energy planning. Mathematical Programming. 1991, vol.
 52, pp. 359{375.
-
-Oba modely znovu odhadnu, ale asi by to chtělo z čerstvějších dat, takže bych poprosil spoty a futury až do konce 2017, nemusejí být moc do minulosti, stačí rok dva (denních dat)
-
-Nově máme
-\begin{itemize}
-\item $B$ - opce. Tady bych poprosil o odhad tebe (nikdy jsem to nedělal, tak to vyjde nastejno:-)). Rámocový postup: vzít historické ceny opcí, vyjádřit si jejich cenu pomocí black scholese s neznámou volatilitou a pak tu volatilitu nastavit tak, aby seděla (výsledku se říká implikovaná volatilita). Jako bezrizikový výnos lze vzít některou úrokovou sazbu ČNB. Pokud bude implikovaná volatilita pro jednotlivé strike ceny hodně jiná, bude se muset udělat něco jako "adjust for smile effect". Výsledkem bude vzoreček, do kterého pak já dosadím spot cenu a strike cenu, a on mmi vyhodí cenu opce. V nesnázích by asi bylo možné obrátit se na Tomáše Tichého (kdyžtak zprostředkuju)
-\item $X_t$, $Y_t$:  tohle je na vás. Protože se ani $X_t$ ani $Y_t$ nenásobí s jinou rozhodovací proměnnou, může se udělat trik, že se $X$ a $Y$ budou považovat za rozhodovací proměnnou a tím se může zachovat stagewise independence. 
-
-Můžeme mít například
-$$
-(X_t,Y_t)' = A (X_{t-1},Y_{t-1})' + b P_{t-1} +  c P_t + \epsilon_t, 
-$$
-kde $A \in \R^{2 \times 2}$, $b,c \in \R^{1\times 2}$ a $\epsilon_t$ jsou i.i.d.
-(tam by bylo $\zeta_t = (X_t,Y_t)', \zeta_t = r_{t-1}+c P_t + \epsilon_t$, $r_{t-1}= A \zeta_{t-1} + b P_{t-1}$), 
-
-Nebo třeba
-$$
-(X_t,Y_t)'= A(X_{t-1},Y_{t-1})' P^\alpha_{t-1} P^\beta_t  \epsilon_t
-$$
-$\alpha,\beta \geq 0$ (tam by bylo $\zeta_t = r_{t-1} P^\beta_t\epsilon_t, r_{t-1}=w_{t-1} P^\alpha_{t-1}, w_{t-1} = A \zeta_{t-1}$)
-První způsob je jednodušší, ale může nás dostat do mínusu, druhej je krkolomnější.
-
-Pokud se ale vzdáme interakcí mezi $X$ a $Y$, a budeme předpokládat 
-$$
-X_t=a X_{t-1} p_{t-1}^\beta p_t^\gamma\epsilon_t
-$$
-(podobně $Y$), pak je to celkem elegantní, protože se to dá přepsat jako $x_t=\log a + x_{t-1} + \alpha P_{t-1} + \beta P_t +\varepsilon_t$  kde $x_t=\log X_t$. (Samozřejmě by bylo skvělý mít koeficient i u $x_{t-1}$, ale to bhžl nejde).
-
-Ve všech případech může být reziduum korelované (takže přírůstky $X$ mohou přirozeně souviset s přírůstky $Y$).
-
-\end{itemize}
-
 

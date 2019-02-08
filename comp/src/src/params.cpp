@@ -1,19 +1,20 @@
 #include "zsk.h"
 
+unsigned int T	=	3		;
+const double varrho	=	1		;
 
-const double varrho	=	0.94		;
 
-const vector<vector<double>> epsvsq	={	{439.901,679.738}	,
-        {679.738,4834.49}	}	;
-const double X0	=	2744.82968313331		;
-const double Y0	=	18982.6356951142		;
+const vector<vector<double>> epsvsq	={	{6388.32,4762.16}	,
+        {4762.16,25050.4}	}	;
+const double X0	=	33735.4413697265		;
+const double Y0	=	246974.179795985		;
 
-const double xregconst	=	2252.07		;
-const double yregconst	=	12852.2		;
-const double xregx	=	1.23574		;
-const double yregx	=	2.24683		;
-const double xregy	=	-0.15202		;
-const double yregy	=	0		;
+const double xregconst	=	37847.7371501255		;
+const double yregconst	=	232561.568392922		;
+const double xregx	=	0.6981		;
+const double yregx	=	1.712		;
+const double xregy	=	-0.1211		;
+const double yregy	=	-0.2638		;
 
 const double spot0	=	7.77		;
 const double sigma 	=	0.439		;
@@ -37,7 +38,7 @@ const double K[]	={	10	,
         22	,
         26	}	;
 
-const double maxkappa	=	5		;
+
 
 const double r[]	={	132218	,
         129555	,

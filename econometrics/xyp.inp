@@ -14,3 +14,8 @@ final<-system method=fiml
     equation X const X(-1) Y(-1)
     equation Y const X(-1)
 end system
+
+#final<-system method=fiml
+#    equation X const X(-1) Y(-1)
+#    equation Y const Y(-1)
+#end system
