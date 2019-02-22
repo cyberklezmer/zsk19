@@ -24,7 +24,7 @@ find_library(COINOSICLP libOsiClp.so ${COIN_LIB_DIR} )
 find_library(COINOSICBC libOsiCbc.so ${COIN_LIB_DIR} )
 
 #Boost libraries
-find_package(Boost 1.61 COMPONENTS system filesystem REQUIRED)
+find_package(Boost 1.62 COMPONENTS system filesystem REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 #Armadillo library

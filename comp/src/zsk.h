@@ -54,7 +54,7 @@ extern	const double K[]
 extern	const double r[];
 
 const unsigned int nfprices=	3	;
-const unsigned int kappa=	5	;
+const unsigned int kappa=	3	;
 
 
 // end of paste
@@ -163,7 +163,7 @@ public:
     for(unsigned int i=0; i<nfprices; i++)
     {
         if(2+i < a.second.size())
-            r.push_back(p*(i+1)*exp( a.second[2+i]));
+            r.push_back(p*exp( (i+1)*a.second[2+i]));
         else
             r.push_back(0);
     }
@@ -180,20 +180,16 @@ public:
   }
 };
 
-#ifdef RISKNEUTRAL
-using dc=expectation;
-#else
-using dc=mpmcvar;
-#endif
 
-class zskproblem: public msproblem<dc, linearfunction,
+template <typename O>
+class zskproblem: public msproblem<O, linearfunction,
         linearmsconstraint,vector<double>,realvar,lastx>
 {
 public:
     bool fdebug;
-    static constexpr double instnbound = 1e10;
+    static constexpr double instnbound = 1e12;
     /// concerns all the stages except for the last one
-    enum vars {zt, xval, yval, et, firstpositive = et, firstft,
+    enum vars {zt, xval, yval, det, et, firstft,
                              nfixed = firstft };
 
 
@@ -202,11 +198,19 @@ public:
         assert(k<=::T);
         return ::T-k;
     }
+
+    static unsigned int ndft(unsigned int k)
+    {
+        assert(k<=::T);
+        return k ? nft(k) : 0;
+    }
+
     static unsigned int nphit(unsigned int k)
     {
         assert(k<=::T);
         return (::T-k) * kappa;
     }
+
     static unsigned int phirelpos(unsigned int k,
                         unsigned int tau, unsigned int strike)
     {
@@ -216,7 +220,7 @@ public:
     static unsigned int nvars(unsigned int k)
     {
         assert(k<=::T);
-        return nfixed + nft(k)+nphit(k);
+        return nfixed + nft(k) + ndft(k) + nphit(k);
     }
 
     static double gf(unsigned int k)
@@ -234,6 +238,17 @@ public:
         assert(tau>k);
         return firstft + (tau-1-k);
     }
+
+    unsigned int dfindex(unsigned int k,unsigned int tau) const
+    {
+        assert(tau <= this->T());
+        assert(k <= this->T());
+        assert(tau);
+        assert(tau>k);
+        assert(k);
+        return firstft + nft(k)+(tau-1-k);
+    }
+
     unsigned int phiindex(unsigned int k,unsigned int tau, unsigned int i)
       const
     {
@@ -242,7 +257,7 @@ public:
         assert(tau);
         assert(tau>k);
         assert(i<kappa);
-        return firstft + nft(k) + phirelpos(k,tau,i);
+        return firstft + nft(k) + ndft(k) + phirelpos(k,tau,i);
     }
 private:
     static std::vector<unsigned int> makeps()
@@ -254,13 +269,13 @@ private:
     }
 public:
     zskproblem(double lambda, double alpha) :
-        msproblem<dc, linearfunction,
+        msproblem<O, linearfunction,
                 linearmsconstraint,vector<double>,realvar,lastx>
         (makeps(),
 #ifdef RISKNEUTRAL
          expectation()
 #else
-      dc(lambda,alpha)
+      O(lambda,alpha)
 #endif
          ), fdebug(false)
     {
@@ -280,17 +295,22 @@ public:
            case yval:
              s << "Y";
              break;
-           case et:
-             s << "e";
+            case et:
+              s << "e";
+              break;
+           case det:
+             s << "de";
              break;
            default:
            {
               unsigned int off = i-firstft;
               if(off<nft(stage))
                  s << "f" << stage + off + 1;
+              else if(off<nft(stage)+ndft(stage))
+                  s << "df" << stage + off - nft(stage) + 1;
               else
               {
-                 unsigned int offf = off - nft(stage);
+                 unsigned int offf = off - nft(stage)-ndft(stage);
                  unsigned int tau = offf / kappa + stage + 1;
                  unsigned int i = offf % kappa + 1;
                  s << "phi" << tau << "(" << i << ")";
@@ -312,7 +332,7 @@ public:
             f.setc(zt,-pow(varrho,k));
     }
 
-    virtual  void x_is(
+    virtual void x_is(
             unsigned int k,
             const vector<double>& zeta,
             ranges<realvar>& xs,
@@ -337,8 +357,13 @@ cout << endl;*/
         unsigned int T = this->T();
 
         unsigned int i=0;
-        for(; i<firstpositive; i++)
+        for(; i<=det; i++)
             xs[i].setlimits();
+        xs[et].setlimits(0,instnbound);
+        for(i=firstft; i<firstft+nft(k); i++)
+            xs[i].setlimits(0,instnbound);
+        for( ;i<firstft+nft(k)+ndft(k); i++)
+            xs[i].setlimits(0,instnbound);
         for(; i<xs.size(); i++)
             xs[i].setlimits(0,instnbound);
 
@@ -353,23 +378,32 @@ cout << endl;*/
         vector<double> zl(ls,0.0);
         double zr = 0.0;
 
-        zl[toff+zt]=-1;
+        vector<double> del(ls,0.0);
+        double der = 0.0;
+
+        del[toff+det]=1;
+        if(k==0)
+            del[toff+et] = -1;
+        else
+        {
+            del[toff+et]=-1;
+            del[et] = 1;
+            der-= gf(k)*1;
+            del[findex(k-1,k)]=1;
+            for(unsigned int i=0; i<kappa; i++)
+                del[phiindex(k-1,k,i)]=1;
+            del[toff+yval] = -1;
+        }
 
         double P=zskm::P(zeta);
+        zl[toff+zt]=-1;
+
         if(k==0)
             zl[toff+et]=-P;
         else
         {
-//enum vars {zt, xval, yval, et, firstpositive = et, firstft, nfixed = firstft };
+            zl[toff+det]=-P;
             zl[toff+xval]=1000;
-
-            zl[toff+et]=-P;
-            zl[et] = P;
-            zr-= gf(k)*P;
-            zl[findex(k-1,k)]=P;
-            for(unsigned int i=0; i<kappa; i++)
-                zl[phiindex(k-1,k,i)]=P;
-            zl[toff+yval] = -P;
 
             for(unsigned int i=0; i<kappa; i++)
                 zl[phiindex(k-1,k,i)] += -min(P,K[i]);
@@ -382,7 +416,7 @@ cout << endl;*/
             zl[toff+findex(k,tau)] = -df*Q;
             if(k)
                 zl[findex(k-1,tau)] = df*Q;
-            df *= varrho;
+            df *= varrho;                        
         }
         for(unsigned int tau=k+1; tau<=T; tau++)
             for(unsigned int i=0; i<kappa; i++)
@@ -393,8 +427,18 @@ cout << endl;*/
                     zl[phiindex(k-1,tau,i)] = B;
             }
 
+        g.add(linearmsconstraint(del,constraint::eq, der));
         g.add(linearmsconstraint(zl,constraint::eq, zr));
 
+        if(k)
+            for(unsigned int tau=k+1; tau<=T; tau++)
+            {
+                vector<double> dfl(ls,0.0);
+                dfl[toff+dfindex(k,tau)]=1;
+                dfl[toff+findex(k,tau)]=-1;
+                dfl[findex(k-1,tau)]=1;
+                g.add(linearmsconstraint(dfl,constraint::eq, 0.0));
+            }
         // x,y
 
         vector<double> xl(ls,0.0);
@@ -416,7 +460,6 @@ cout << endl;*/
             xl[yval]=-xregy;
             xr = xregconst+zskm::Xeps(zeta);
 
-
             yl[toff+yval] = 1;
             yl[xval]=-yregx;
             yl[yval]=-yregy;
@@ -429,11 +472,11 @@ cout << endl;*/
     }
     double minf_is() const
     {
-        return  -1e11;
+        return  -1e15;
     }
     double maxf_is() const
     {
-        return 1e11;
+        return 1e15;
     }
 };
 

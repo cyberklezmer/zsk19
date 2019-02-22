@@ -251,29 +251,40 @@ risk measure, applied to the differences of profits from the production and the 
 \subsection*{Problem definition}
 
 
-The subject of decision is the way of optimal emission trading. In particular, at $t$, it is the number $\Delta s_{t}$ of
+The subject of decision is the optimal emission covering. In particular, at $t$, it is the number $\Delta s_{t}$ of
 the spot allowances purchased/sold at $t$, the numbers $$\Delta f_{t}=(\Delta f_{t}^{t+1},\dots,\Delta f_{t}^{T})$$
-of the futures with maturities $t+1,\dots,T$ purchased/sold, and the numbers 
+of the futures with maturities $t+1,\dots,T$ purchased (we do not allow selling of the futures to avoid speculations, which are in practise prevented by margin requirements, which we neglect here), and the numbers 
 \[
 \Delta \phi_{t}=\left[\begin{array}{ccc}
 \Delta \phi_{t}^{t+1,1} & \dots & \Delta \phi_{t}^{T,1}\\
 \vdots &  & \vdots\\
-\Delta \phi_{t}^{t+1,\kappa,} & \dots & \Delta \phi_{t}^{T,\kappa}
-\end{array}\right]
+\Delta \phi_{t}^{t+1,\kappa} & \dots & \Delta \phi_{t}^{T,\kappa}
+\end{array}\right],
+\qquad
+\Delta \psi_{t}=\left[\begin{array}{ccc}
+\Delta \psi_{t}^{t+1,1} & \dots & \Delta \psi_{t}^{T,1}\\
+\vdots &  & \vdots\\
+\Delta \psi_{t}^{t+1,\mu} & \dots & \Delta \psi_{t}^{T,\mu}
+\end{array}\right],
 \]
-of the call options purchased/sold; here, $\Delta \phi_t^{\tau,i}$ denotes the number of call options with maturity $\tau$ and strike price $K_i$.
+of the call options, put options, respectively, purchased/sold; here, $\Delta \phi_t^{\tau,i}$/$\Delta \psi_t^{\tau,i}$ denotes the number of call/put options with maturity $\tau$ and strike price $K_i$ / $M_i$.
 
 At $t=0$, the income of the company is
 $$
-y_0=-P_0\Delta s_0- \sum_{\tau=1}^{T}\sum_{i=1}^{\kappa}B_0^{\tau,i}\Delta \phi_0^{\tau,i},
+y_0=-P_0\Delta s_0
+- \sum_{\tau=1}^{T}\sum_{i=1}^{\kappa}B_0^{\tau,i}\Delta \phi_0^{\tau,i},
+- \sum_{\tau=1}^{T}\sum_{i=1}^{\mu}C_0^{\tau,i}\Delta \psi_0^{\tau,i},
 $$
 while, at any $0<t\leq T$, the income is
-$$
-y_t  =X_t-P_t \Delta s_t-\sum_{i=1}^{\kappa}\min(P_t,K_{i})\phi_{t-1}^{t,i}
--\sum_{\tau=0}^{t-1}Q_{\tau}^{t}\Delta f_{\tau}^t-\sum_{\tau=t+1}^{T}\sum_{i=1}^{\kappa}B_t^{\tau,i}\Delta\phi_t^{\tau-t,i}.
-$$
-Here, $f_t=\sum_{\tau=0}^t \Delta f^t_\tau$ and 
-$\phi_t=\sum_{\tau=0}^t \Delta \phi_\tau^t$. Further, $X_t\in \R_+$ is the profit from the production at time $t$, $Y_t \in \R_+$ is the amount of the emissions at $t$, $P_t\in\R_{+}$ is the spot price at time $t$, $Q_t^\tau \in \R_+$ is the price of the future with maturity $\tau$ at time $t$, and $B_t^{\tau,i}\in \R_+$ is the premium paid at $t$ for the call option with strike price $K_i$ and maturity $\tau$. 
+\begin{multline*}
+y_t  =X_t-P_t \Delta s_t
+-\sum_{i=1}^{\kappa}\min(P_t,K_{i})\phi_{t-1}^{t,i}
++\sum_{i=1}^{\mu}\max(P_t,M_{i})\psi_{t-1}^{t,i}
+-\sum_{\tau=0}^{t-1}Q_{\tau}^{t}\Delta f_{\tau}^t-\sum_{\tau=t+1}^{T}\sum_{i=1}^{\kappa}B_t^{\tau,i}\Delta\phi_t^{\tau-t,i}-
+\sum_{\tau=t+1}^{T}\sum_{i=1}^{\mu}C_t^{\tau,i}\Delta\psi_t^{\tau-t,i}
+\end{multline*}
+Here, $f_t=\sum_{\tau=0}^t \Delta f^t_\tau$, 
+$\phi_t=\sum_{\tau=0}^t \Delta \phi_\tau^t$ and $\psi_t=\sum_{\tau=0}^t \Delta \psi_\tau^t$. Further, $X_t\in \R_+$ is the profit from the production at time $t$, $Y_t \in \R_+$ is the amount of the emissions at $t$, $P_t\in\R_{+}$ is the spot price at time $t$, $Q_t^\tau \in \R_+$ is the price of the future with maturity $\tau$ at time $t$, and $B_t^{\tau,i}\in \R_+$ is the premium paid at $t$ for the call option with strike price $K_i$ and maturity $\tau$. 
 
 The aim of the company is to minimize $\rho(-y_0,\dots,-y_T)$
 where $\rho$ is the nested mean-CVaR criterion; in particular, for any real $c_0,\dots,c_T$,
@@ -308,21 +319,19 @@ $$
 z_0=-P_0e_0-\sum_{\tau=1}^{T}\varrho^{\tau}Q_0^{\tau} f_0^{\tau}-  \sum_{\tau=1}^{T}\sum_{i=1}^{\kappa}B_0^{\tau,i}\phi_0^{\tau,i}, 
 $$
 \begin{multline*}
-z_t  =X_t-P_t 
-\left(
-e_t -e_{t-1}-r_t-
-f_{t-1}^t-\sum_{i=1}^{\kappa}\phi_{t-1}^{t,i}+Y_t
-\right)
-\\
+z_t  =X_t-P_t \Delta s_t
 -\sum_{i=1}^{\kappa}\min(P_t,K_{i})\phi_{t-1}^{t,i}
 -\sum_{\tau=t+1}^{T}\varrho^{\tau-t}Q_t^{\tau}(f_t^{\tau-t}
 -f_{t-1}^{\tau-t})
 \\-\sum_{\tau=t+1}^{T}\sum_{i=1}^{\kappa}B_t^{\tau,i}
 (\phi_t^{\tau-t,i}-\phi_{t-1}^{\tau-t,i}),\qquad 0<t\leq T.
 \end{multline*}
+$$
+\Delta s_t = e_t -e_{t-1}-r_t-
+f_{t-1}^t-\sum_{i=1}^{\kappa}\phi_{t-1}^{t,i}+Y_t
+$$
 
-
-
+TBD no selling futures	
 \section{Data}
 
 $T=0$ odpovídá začátku 2018, $T=3$ (end of 2020)
