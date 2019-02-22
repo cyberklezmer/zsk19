@@ -47,7 +47,7 @@ struct dtestparams
     bool sddp;
 };
 
-template <typename O>
+template <typename O, typename S=cplex<realvar>>
 void dtest(const dtestparams& p)
 {
     constexpr bool mp = std::is_same<O,mpmcvar>::value;
@@ -124,18 +124,12 @@ void dtest(const dtestparams& p)
     static_assert(std::is_same<typename dxieta_t::X_t,pair<unsigned int, pair<double, vector<double>>>>::value);
 
     static_assert(std::is_same<typename zeta_t::X_t,pair<unsigned int, pair<double, vector<double>>>>::value);
-    desolution<zskproblem<mpmcvar>,dxieta_t,zeta_t,
-//            cplex<realvar>
-csvlpsolver<realvar>
-            >* sp = 0;
+    desolution<zskproblem<mpmcvar>,dxieta_t,zeta_t,S>* sp = 0;
     vectors<double> aves;
     vectors<unsigned int> cnts;
     if constexpr(mp)
     {
-        sp = new desolution<zskproblem<mpmcvar>,dxieta_t,zeta_t,
-//                cplex<realvar>
-csvlpsolver<realvar>
-                >(pr,xieta);
+        sp = new desolution<zskproblem<mpmcvar>,dxieta_t,zeta_t,S>(pr,xieta);
 
 
         sp->x()->print(sys::log());
@@ -395,6 +389,7 @@ cout << endl;
 
 #endif // RISKNEUTRAL
 
+//continuous 5 stages
 extern vector<double> x01;
 extern vector<probability> aprs1;
 extern vector<vector<double>> adata1;
@@ -408,20 +403,22 @@ extern vector<vector<double>> adata3;
 
 void atest(const vector<double>& x0,
     const vector<probability>& aprs,
-    const vector<vector<double>>& adata
+    const vector<vector<double>>& adata,
+    unsigned int npp
 )
 {
     unsigned int saveT = T;
     T=1;
     vector<atom<vector<double>>> a;
     double ave = 0;
-    for(unsigned int i=0; i<adata.size(); i++)
-    {
-        vector<double> x = adata[i];
-        probability p = aprs[i/100]/100.0;
-        ave += p * x[0];
-        a.push_back({x,p});
-    }
+    for(unsigned int k=0; k<adata.size()/100; k++)
+        for(unsigned int i=0; i<npp; i++)
+        {
+            vector<double> x = adata[100*k+i];
+            probability p = aprs[k]/(double) npp;
+            ave += p * x[0];
+            a.push_back({x,p});
+        }
     cout << "ave = " << ave << endl;
     ldistribution<vector<double>> d(a);
 
@@ -486,30 +483,30 @@ int main(int, char **)
             dtest<mpmcvar /*nestedmcvar*/>(p);
         }
 
-        if constexpr(0) // reproducing "missing vars"
+        if constexpr(0) // simple test
         {
             dtestparams p;
 
-            p.T=2;
+            p.T=1;
             p.trivialm=true;
-            p.almleaves = 2;
+            p.almleaves = 1;
             p.etaleaves = 1;
-            p.lambda=1;
+            p.lambda=0.1;
             p.delta = 0.2;
-            p.sddp = true;
-            dtest<nestedmcvar>(p);
+            p.sddp = false;
+            dtest<mpmcvar/*,csvlpsolver<realvar>*/>(p);
         }
 
         compparams p;
-        if  constexpr(1) // produces arbitrage
+        if  constexpr(1)
         {
             p.comment = "varrho 0.96 - martingal";
 
             p.T = 1;
-            p.patoms = 5;
+            p.patoms = 20;
 
-            p.id = "prelim10d5aaaa";
-            p.lambda = 1;
+            p.id = "prelim10d5psi";
+            p.lambda = 0.1;
             cont<nestedmcvar,cha_t>(p, res, true);
 /*
             p.id = "lambda0c";
@@ -529,7 +526,7 @@ int main(int, char **)
          }
 #endif // RISKNEUTRAL
         if  constexpr(0)
-            atest(x03,aprs3,adata3);
+            atest(x02,aprs2,adata2,100);
     }
     catch (mspp::exception& e)
     {

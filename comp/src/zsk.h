@@ -49,12 +49,22 @@ extern	const double K[]
 
                 ;
 
+extern	const double L[]
 
 
-extern	const double r[];
+
+                ;
+
+
+
+
+extern	const double r[]
+
+                ;
 
 const unsigned int nfprices=	3	;
 const unsigned int kappa=	3	;
+const unsigned int mu=	3	;
 
 
 // end of paste
@@ -107,6 +117,16 @@ double inline bsf(double spot, double strike, double tau)
     return res;
 }
 
+double inline csf(double spot, double strike, double tau)
+{
+    double pv = strike * exp(-rf*tau);
+    double res = pv - spot + bsf(spot,strike,tau);
+    return res;
+}
+//-1.4632e+07 -
+// -1.48042e+07 - 705044 fut - 2595660 psi
+
+
 class zskm: public mapping<pair<double,vector<double>>,vector<double>>
 {
 public:
@@ -115,7 +135,7 @@ public:
 
   static unsigned int zetasize()
   {
-      return efirstfuture + nfprices + kappa * T;
+      return efirstfuture + nfprices + 2 * kappa * T;
   }
 
   static double P(const vector<double> zeta)
@@ -153,6 +173,15 @@ public:
       return zeta[efirstoption+kappa*(ttm-1)+i];
   }
 
+  static double C(const vector<double> zeta,unsigned int ttm,
+                                                  unsigned int i)
+  {
+      assert(zeta.size()==zetasize());
+      assert(ttm>0);
+      assert(efirstoption+kappa*T+kappa*(ttm-1)+i<zeta.size());
+      return zeta[efirstoption+kappa*T+kappa*(ttm-1)+i];
+  }
+
 
   virtual vector<double> operator() (const pair<double,vector<double>>& a) const
   {
@@ -173,6 +202,14 @@ public:
         {
             double b = bsf(p,K[i],tau);
             r.push_back(b);
+        }
+    }
+    for(unsigned int tau=1; tau<=T; tau++)
+    {
+        for(unsigned int i=0; i<kappa; i++)
+        {
+            double c = csf(p,L[i],tau);
+            r.push_back(c);
         }
     }
     assert(r.size()==zetasize());
@@ -211,16 +248,30 @@ public:
         return (::T-k) * kappa;
     }
 
+    static unsigned int npsit(unsigned int k)
+    {
+        return nphit(k);
+    }
+
+
     static unsigned int phirelpos(unsigned int k,
                         unsigned int tau, unsigned int strike)
     {
         assert(k<tau);
         return (tau-k-1)*kappa + strike;
     }
+
+    static unsigned int psirelpos(unsigned int k,
+                        unsigned int tau, unsigned int strike)
+    {
+        return phirelpos(k,tau,strike);
+    }
+
+
     static unsigned int nvars(unsigned int k)
     {
         assert(k<=::T);
-        return nfixed + nft(k) + ndft(k) + nphit(k);
+        return nfixed + nft(k) + ndft(k) + nphit(k) + npsit(k);
     }
 
     static double gf(unsigned int k)
@@ -258,6 +309,16 @@ public:
         assert(tau>k);
         assert(i<kappa);
         return firstft + nft(k) + ndft(k) + phirelpos(k,tau,i);
+    }
+    unsigned int psiindex(unsigned int k,unsigned int tau, unsigned int i)
+      const
+    {
+        assert(tau <= this->T());
+        assert(k <= this->T());
+        assert(tau);
+        assert(tau>k);
+        assert(i<kappa);
+        return firstft + nft(k) + ndft(k) + nphit(k) + psirelpos(k,tau,i);
     }
 private:
     static std::vector<unsigned int> makeps()
@@ -299,7 +360,7 @@ public:
               s << "e";
               break;
            case det:
-             s << "de";
+             s << "ds";
              break;
            default:
            {
@@ -308,12 +369,19 @@ public:
                  s << "f" << stage + off + 1;
               else if(off<nft(stage)+ndft(stage))
                   s << "df" << stage + off - nft(stage) + 1;
-              else
+              else if(off<nft(stage)+ndft(stage)+nphit(stage))
               {
                  unsigned int offf = off - nft(stage)-ndft(stage);
                  unsigned int tau = offf / kappa + stage + 1;
                  unsigned int i = offf % kappa + 1;
                  s << "phi" << tau << "(" << i << ")";
+              }
+              else
+              {
+                 unsigned int offf = off - nft(stage)-ndft(stage)-nphit(stage);
+                 unsigned int tau = offf / kappa + stage + 1;
+                 unsigned int i = offf % kappa + 1;
+                 s << "psi" << tau << "(" << i << ")";
               }
             }
         }
@@ -392,6 +460,8 @@ cout << endl;*/
             del[findex(k-1,k)]=1;
             for(unsigned int i=0; i<kappa; i++)
                 del[phiindex(k-1,k,i)]=1;
+            for(unsigned int i=0; i<kappa; i++)
+                del[psiindex(k-1,k,i)]=-1;
             del[toff+yval] = -1;
         }
 
@@ -407,6 +477,8 @@ cout << endl;*/
 
             for(unsigned int i=0; i<kappa; i++)
                 zl[phiindex(k-1,k,i)] += -min(P,K[i]);
+            for(unsigned int i=0; i<kappa; i++)
+                zl[psiindex(k-1,k,i)] += max(P,L[i]);
         }
 
         double df = varrho;
@@ -419,6 +491,7 @@ cout << endl;*/
             df *= varrho;                        
         }
         for(unsigned int tau=k+1; tau<=T; tau++)
+        {
             for(unsigned int i=0; i<kappa; i++)
             {
                 double B = zskm::B(zeta,tau-k,i);
@@ -426,7 +499,14 @@ cout << endl;*/
                 if(k)
                     zl[phiindex(k-1,tau,i)] = B;
             }
-
+            for(unsigned int i=0; i<kappa; i++)
+            {
+                double C = zskm::C(zeta,tau-k,i);
+                zl[toff+psiindex(k,tau,i)] = -C;
+                if(k)
+                    zl[psiindex(k-1,tau,i)] = C;
+            }
+        }
         g.add(linearmsconstraint(del,constraint::eq, der));
         g.add(linearmsconstraint(zl,constraint::eq, zr));
 

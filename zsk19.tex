@@ -279,7 +279,7 @@ while, at any $0<t\leq T$, the income is
 \begin{multline*}
 y_t  =X_t-P_t \Delta s_t
 -\sum_{i=1}^{\kappa}\min(P_t,K_{i})\phi_{t-1}^{t,i}
-+\sum_{i=1}^{\mu}\max(P_t,M_{i})\psi_{t-1}^{t,i}
++\sum_{i=1}^{\mu}\max(P_t,L_{i})\psi_{t-1}^{t,i}
 -\sum_{\tau=0}^{t-1}Q_{\tau}^{t}\Delta f_{\tau}^t-\sum_{\tau=t+1}^{T}\sum_{i=1}^{\kappa}B_t^{\tau,i}\Delta\phi_t^{\tau-t,i}-
 \sum_{\tau=t+1}^{T}\sum_{i=1}^{\mu}C_t^{\tau,i}\Delta\psi_t^{\tau-t,i}
 \end{multline*}
@@ -298,7 +298,10 @@ Next we reformulate the decision problem into a form, which is more convenient f
 Denote $e_t$ the amount of the allowances held (immediately after) $t$. Clearly, $e_0=\Delta s_0$ and 
 \begin{equation}\label{eq:e}
 e_t = e_{t-1}+\Delta s_t+r_t +
-f_{t-1}^t+\sum_{i=1}^{\kappa}\phi_{t-1}^{t,i}-Y_t,
+f_{t-1}^t
++\sum_{i=1}^{\kappa}\phi_{t-1}^{t,i}
+-\sum_{i=1}^{\kappa}\psi_{t-1}^{t,i}
+-Y_t,
 \end{equation}
 As $\Delta f^t_\tau=f^t_\tau-f^t_{\tau-1}$, and similarly $\phi$, and as $\Delta s$ may be expressed from (\ref{eq:e}), we can alternatively take $e,f,\phi$ as decision variables. Further, as, at any $t$, the payment for futures with maturity $t$ is equal to $\sum_{\tau=0}^{t-1} b_\tau$ where $b_\tau \in  \F_\tau$, we may assume, without a change of the decision criterion's value, that $\varrho^{t-\tau}c_\tau$ is paid at each $0\leq \tau < T$ instead of the whole amount at $t$.
 
@@ -320,7 +323,8 @@ z_0=-P_0e_0-\sum_{\tau=1}^{T}\varrho^{\tau}Q_0^{\tau} f_0^{\tau}-  \sum_{\tau=1}
 $$
 \begin{multline*}
 z_t  =X_t-P_t \Delta s_t
--\sum_{i=1}^{\kappa}\min(P_t,K_{i})\phi_{t-1}^{t,i}
+-\sum_{i=1}^{\kappa}\max(P_t,K_{i})\phi_{t-1}^{t,i}
++\sum_{i=1}^{\kappa}\min(P_t,L_{i})\phi_{t-1}^{t,i}
 -\sum_{\tau=t+1}^{T}\varrho^{\tau-t}Q_t^{\tau}(f_t^{\tau-t}
 -f_{t-1}^{\tau-t})
 \\-\sum_{\tau=t+1}^{T}\sum_{i=1}^{\kappa}B_t^{\tau,i}
@@ -328,7 +332,10 @@ z_t  =X_t-P_t \Delta s_t
 \end{multline*}
 $$
 \Delta s_t = e_t -e_{t-1}-r_t-
-f_{t-1}^t-\sum_{i=1}^{\kappa}\phi_{t-1}^{t,i}+Y_t
+f_{t-1}^t
+-\sum_{i=1}^{\kappa}\phi_{t-1}^{t,i}
++\sum_{i=1}^{\kappa}\psi_{t-1}^{t,i}
++Y_t
 $$
 
 TBD no selling futures	

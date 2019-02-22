@@ -38,6 +38,12 @@ const double K[]	={	10	,
         22	,
         26	}	;
 
+const double L[]	={	6	,
+        5	,
+        4	,
+        3	,
+        2	}	;
+
 
 
 const double r[]	={	132218	,
