@@ -13,8 +13,8 @@ using namespace mspp;
 
 extern	unsigned int T	;
 extern	const double varrho	;
-
-
+extern	const double iota	;
+extern	const double Fper	;
 extern	const vector<vector<double>> epsvsq
                 ;
 extern	const double X0	;
@@ -62,9 +62,11 @@ extern	const double r[]
 
                 ;
 
+
+
+
 const unsigned int nfprices=	3	;
-const unsigned int kappa=	3	;
-const unsigned int mu=	3	;
+const unsigned int kappa=	2	;
 
 
 // end of paste
@@ -123,15 +125,39 @@ double inline csf(double spot, double strike, double tau)
     double res = pv - spot + bsf(spot,strike,tau);
     return res;
 }
-//-1.4632e+07 -
-// -1.48042e+07 - 705044 fut - 2595660 psi
+
+
+inline vectors<double> etasqV(unsigned int k, double omega)
+{
+    assert(k<=T);
+    assert(k>0);
+
+    vectors<double>r(7-k);
+    for(unsigned int i=0; i<r.size(); i++)
+        r[i]=vector<double>(7-k,0.0);
+
+    r[0][0] = sqrt(1-omega)*epsvsq[0][0];
+    r[0][1] = sqrt(1-omega)*epsvsq[0][1];
+    r[1][0] = sqrt(1-omega)*epsvsq[1][0];
+    r[1][1] = sqrt(1-omega)*epsvsq[1][1];
+
+    r[2][2] = sqrt(omega)*epsvsq[0][0];
+    r[2][3] = sqrt(omega)*epsvsq[0][1];
+    r[3][2] = sqrt(omega)*epsvsq[1][0];
+    r[3][3] = sqrt(omega)*epsvsq[1][1];
+
+    for(unsigned int i=4; i<7-k; i++)
+        r[i][i] = varsigma;
+    return r;
+}
 
 
 class zskm: public mapping<pair<double,vector<double>>,vector<double>>
 {
 public:
 
-  enum { espot, exeps, eyeps, efirstfuture, ef1=efirstfuture, ef2, ef3, efirstoption };
+  enum { espot,  exg, eyg, exnextf, eynextf, efirstfuture,
+         ef1=efirstfuture, ef2, ef3, efirstoption };
 
   static unsigned int zetasize()
   {
@@ -148,20 +174,33 @@ public:
   {
       assert(zeta.size()==zetasize());
       assert(efirstfuture+ttm-1<zeta.size());
+//cout << "ttm=" << ttm << " Q=" << zeta[efirstfuture+ttm-1] << endl;
       return zeta[efirstfuture+ttm-1];
   }
 
-  static double Xeps(const vector<double> zeta)
+  static double Xnextf(const vector<double> zeta)
   {
       assert(zeta.size()==zetasize());
-      return zeta[exeps];
+      return zeta[exnextf];
   }
 
-    static double Yeps(const vector<double> zeta)
+    static double Ynextf(const vector<double> zeta)
   {
       assert(zeta.size()==zetasize());
-      return zeta[eyeps];
+      return zeta[eynextf];
   }
+
+    static double Xg(const vector<double> zeta)
+    {
+        assert(zeta.size()==zetasize());
+        return zeta[exg];
+    }
+
+    static double Yg(const vector<double> zeta)
+    {
+        assert(zeta.size()==zetasize());
+        return zeta[eyg];
+    }
 
 
   static double B(const vector<double> zeta,unsigned int ttm,
@@ -188,11 +227,12 @@ public:
     double p=exp(a.first);
 //cout << "a.first = " << a.first << endl;
 //cout << "Px = " << p << endl;
-    vector<double> r({ p,a.second[0],a.second[1] });
+    vector<double> r({ p,a.second[0],a.second[1],a.second[2],a.second[3] });
+    unsigned int is=4;
     for(unsigned int i=0; i<nfprices; i++)
     {
-        if(2+i < a.second.size())
-            r.push_back(p*exp( (i+1)*a.second[2+i]));
+        if(is+i < a.second.size())
+            r.push_back(p*exp( (i+1)*a.second[is+i]));
         else
             r.push_back(0);
     }
@@ -218,15 +258,22 @@ public:
 };
 
 
-template <typename O>
+template <typename O, bool nox = true>
 class zskproblem: public msproblem<O, linearfunction,
         linearmsconstraint,vector<double>,realvar,lastx>
 {
 public:
+    double F() const
+    {  // tbd do params, pokud se bude pouivat
+        double res = T * 32639 - sqrt(T) * 8811 * 2;
+        if(!nox)
+            res += T * 227286 - sqrt(T) * 26339*2;
+    }
+
     bool fdebug;
     static constexpr double instnbound = 1e12;
     /// concerns all the stages except for the last one
-    enum vars {zt, xval, yval, det, et, firstft,
+    enum vars {zt, xval, yval, det, et, vt, wt=vt,  fx, nlast=fx, fy, firstft,
                              nfixed = firstft };
 
 
@@ -271,7 +318,10 @@ public:
     static unsigned int nvars(unsigned int k)
     {
         assert(k<=::T);
-        return nfixed + nft(k) + ndft(k) + nphit(k) + npsit(k);
+        if(k==T)
+            return nlast;
+        else
+            return nfixed + nft(k) + ndft(k) + nphit(k) + npsit(k);
     }
 
     static double gf(unsigned int k)
@@ -353,15 +403,25 @@ public:
            case xval:
              s << "X";
              break;
+           case fx:
+             s << "xf";
+             break;
            case yval:
              s << "Y";
              break;
-            case et:
+           case fy:
+              s << "yf";
+              break;
+           case et:
               s << "e";
               break;
            case det:
              s << "ds";
              break;
+           case wt:
+              s << (stage==this->T() ?  "w" : "v");
+              break;
+          break;
            default:
            {
               unsigned int off = i-firstft;
@@ -397,7 +457,11 @@ public:
         if(k==0)
             f.setc(zt,-1);
         else
+        {
             f.setc(zt,-pow(varrho,k));
+            if(k==this->T())
+                f.setc(wt,pow(varrho,k));
+        }
     }
 
     virtual void x_is(
@@ -425,8 +489,24 @@ cout << endl;*/
         unsigned int T = this->T();
 
         unsigned int i=0;
+        xs[zt].setlimits();
+        xs[xval].setlimits();
+        xs[yval].setlimits();
+        xs[det].setlimits();
+        xs[et].setpositive();
+        xs[vt].setlimits();
         for(; i<=det; i++)
             xs[i].setlimits();
+        if(k==0)
+        {
+            xs[fx].setlimits(0,0);
+            xs[fy].setlimits(0,0);
+        }
+        else if(k<T)
+        {
+            xs[fx].setlimits(zskm::Xnextf(zeta),zskm::Xnextf(zeta));
+            xs[fy].setlimits(zskm::Ynextf(zeta),zskm::Ynextf(zeta));
+        }
         xs[et].setlimits(0,instnbound);
         for(i=firstft; i<firstft+nft(k); i++)
             xs[i].setlimits(0,instnbound);
@@ -441,6 +521,8 @@ cout << endl;*/
         if(k==T)
             xs[et].setlimits(0,0);
 
+        if(k==0)
+            xs[vt].setlimits(0,0);
         // zt
 
         vector<double> zl(ls,0.0);
@@ -456,7 +538,7 @@ cout << endl;*/
         {
             del[toff+et]=-1;
             del[et] = 1;
-            der-= gf(k)*1;
+            der-= gf(k);
             del[findex(k-1,k)]=1;
             for(unsigned int i=0; i<kappa; i++)
                 del[phiindex(k-1,k,i)]=1;
@@ -473,8 +555,8 @@ cout << endl;*/
         else
         {
             zl[toff+det]=-P;
-            zl[toff+xval]=1000;
-
+            if(!nox)
+                zl[toff+xval]=1000;
             for(unsigned int i=0; i<kappa; i++)
                 zl[phiindex(k-1,k,i)] += -min(P,K[i]);
             for(unsigned int i=0; i<kappa; i++)
@@ -538,16 +620,43 @@ cout << endl;*/
             xl[toff+xval] = 1;
             xl[xval]=-xregx;
             xl[yval]=-xregy;
-            xr = xregconst+zskm::Xeps(zeta);
+            xl[fx]=-1;
+            xr = xregconst+zskm::Xg(zeta);
 
             yl[toff+yval] = 1;
             yl[xval]=-yregx;
             yl[yval]=-yregy;
-            yr = yregconst+zskm::Yeps(zeta);;
+            yl[fy]=-1;
+            yr = yregconst+zskm::Yg(zeta);
         }
 
         g.add(linearmsconstraint(xl,constraint::eq, xr));
         g.add(linearmsconstraint(yl,constraint::eq, yr));
+
+        if(k>0)
+        {
+            if(k<T)
+            {
+                vector<double> vl(ls,0.0);
+                vl[toff+vt] = -1;
+                vl[vt] = 1.0 / varrho;
+                vl[toff+zt] = 1;
+                g.add(linearmsconstraint(vl,constraint::eq, 0));
+            }
+            else // k==T
+            {
+                if(::iota > 0)
+                {
+                    vector<double> ul(ls,0.0);
+                    ul[toff+wt] = 1.0 / ::iota;
+                    ul[vt] = 1.0 / varrho;
+                    ul[toff+zt] = 1;
+                    g.add(linearmsconstraint(ul,constraint::geq, F()));
+                }
+                xs[wt].setpositive();
+//xs[wt].setlimits(P,P);
+            }
+        }
 
     }
     double minf_is() const

@@ -5,7 +5,7 @@
 #include "mspp/process.h"
 #include "mspp/msproblem.h"
 #include "mspp/mspptest.h"
-//#include "mspp/cplex.h"
+#include "mspp/cplex.h"
 #include "zsk.h"
 #include <mcheck.h>
 
@@ -13,23 +13,6 @@ using namespace mspp;
 
 #ifndef RISKNEUTRAL
 
-vectors<double> etasqV(unsigned int k)
-{
-    assert(k<=T);
-    assert(k>0);
-
-    vectors<double>r(5-k);
-    for(unsigned int i=0; i<r.size(); i++)
-        r[i]=vector<double>(5-k,0.0);
-    r[0][0] = epsvsq[0][0];
-    r[0][1] = epsvsq[0][1];
-    r[1][0] = epsvsq[1][0];
-    r[1][1] = epsvsq[1][1];
-
-    for(unsigned int i=2; i<5-k; i++)
-        r[i][i] = varsigma;
-    return r;
-}
 
 struct dtestparams
 {
@@ -63,16 +46,16 @@ void dtest(const dtestparams& p)
     vector<etad_t> dsts;
     for(unsigned int k=1; k<=T; k++)
     {
-        vector<double> mean(5-k,0.0);
-        for(unsigned int i=2; i<5-k; i++)
+        vector<double> mean(7-k,0.0);
+        for(unsigned int i=4; i<7-k; i++)
             mean[i]=qcoef;
-        dsts.push_back(etad_t(mean,etasqV(k),stdd));
+        dsts.push_back(etad_t(mean,etasqV(k,0 /*tbd*/),stdd));
     }
 
     using dirac_t = diracdistribution<vector<double>>;
     using etapd_t = processdistribution<etad_t,noxi<vector<double>>>;
 
-    etapd_t etapd(dirac_t({0,0,v0[0],v0[1],v0[2]}),dsts);
+    etapd_t etapd(dirac_t({0,0,0,0,v0[0],v0[1],v0[2]}),dsts);
 
     vector<almdistribution> d;
     vector<mmcdistribution> m;
@@ -218,11 +201,12 @@ void dtest(const dtestparams& p)
 
 struct compparams
 {
-    string id = string("");
+    string id = string("nan");
     string comment = string("");
     unsigned int T = ::T;
     unsigned int patoms = 3;
     double lambda = 0.5;
+    double omega = 0;
 };
 
 class expmapping : public mapping<double,double>
@@ -237,11 +221,11 @@ public:
 using cha_t = chmcapproximation<arnormalprocessdistribution,onedcovering,true>;
 using dha_t=dhmcapproximation<arnormalprocessdistribution,onedcovering,1,true,expmapping>;
 
-template <typename O,typename ha_t>
-void cont(const compparams& pars,
-          std::ofstream& res,
+template <typename O,typename ha_t, bool nox>
+void cont(const compparams& pars, std::ofstream& res,
           bool headers = false  )
 {
+    constexpr bool contin = std::is_same<ha_t,cha_t>::value;
     unsigned int saveT = T;
     T=pars.T;
     using stdd_t=stdnormaldistribution;
@@ -255,16 +239,16 @@ void cont(const compparams& pars,
     vector<etad_t> dsts;
     for(unsigned int k=1; k<=T; k++)
     {
-        vector<double> mean(5-k,0.0);
-        for(unsigned int i=2; i<5-k; i++)
+        vector<double> mean(7-k,0.0);
+        for(unsigned int i=4; i<7-k; i++)
             mean[i]=qcoef;
-        dsts.push_back(etad_t(mean,etasqV(k)));
+        dsts.push_back(etad_t(mean,etasqV(k,pars.omega)));
     }
 
     using dirac_t = diracdistribution<vector<double>>;
     using etapd_t = processdistribution<etad_t,noxi<vector<double>>>;
 
-    etapd_t eta(dirac_t({0,0,v0[0],v0[1],v0[2]}),dsts);
+    etapd_t eta(dirac_t({0,0,0,0,v0[0],v0[1],v0[2]}),dsts);
 
     double xim = -sigma*sigma/2.0;
     double xisd = sigma;
@@ -281,15 +265,15 @@ void cont(const compparams& pars,
     nx.push_back(na);
 
     vector<double> trends;
-    if constexpr(std::is_same<ha_t,cha_t>::value)
+    if constexpr(contin)
     {
         trends = vector<double>(T,xim);
     }
     ha_t ha(xipd,nx,trends);
 
-cout << "prs" << endl;
-    cout << ha.d(1).first().m() << endl;
-cout << endl;
+//cout << "prs" << endl;
+//    cout << ha.d(1).first().m() << endl;
+//cout << endl;
     if constexpr(std::is_same<ha_t,dha_t>::value)
     {
         printtreed(cout,ha);
@@ -316,7 +300,7 @@ cout << endl;
 
     using zeta_t = hmczeta<pair<double, vector<double>>,zskm>;
 
-    zskproblem<O> p(pars.lambda,0.05);
+    zskproblem<O,nox> p(pars.lambda,0.05);
 
     vector<vector<std::string>> n;
     p.varnames(n);
@@ -333,7 +317,7 @@ cout << endl;
 
     if(headers)
     {
-        res << "id,lambda";
+        res << "id,lambda,omega";
         for(unsigned int i=0; i< n.size();i++)
         {
             for(unsigned int j=0; j< n[i].size(); j++)
@@ -344,9 +328,9 @@ cout << endl;
         res << ",time,lb,ubm,ubb,states..." << endl;
      }
 
-    msddpsolution<zskproblem<O>,xieta_t,zeta_t,cplex<realvar>> sx(p,xieta,dims);
+    msddpsolution<zskproblem<O,nox>,xieta_t,zeta_t,cplex<realvar>> sx(p,xieta,dims);
 
-    res << pars.id << "," << pars.lambda;
+    res << pars.id << "," << pars.lambda  << "," << pars.omega;
 
     for(unsigned int i=0; i< n.size();i++)
     {       
@@ -450,6 +434,31 @@ void atest(const vector<double>& x0,
     T = saveT;
 }
 
+void grid( std::ofstream& res)
+{
+    compparams p;
+    p.T = 3;
+    p.patoms = 10;
+
+    bool headers = true;
+    for(double lambda = 0.1; lambda < 1.001; lambda+=0.9) //0.45)
+        for(double omega = 0.0; omega < 1.001; omega+=1 ) //0.5)
+        {
+            ostringstream s;
+            s << "lambda" << lambda << "omega"
+              << omega << "n" << p.patoms;
+            p.lambda = lambda;
+            p.omega = omega;
+            p.id = s.str();
+            cont<nestedmcvar,dha_t,false>(p, res, headers);
+            headers = false;
+            s << "nox";
+            p.id = s.str();
+            cont<nestedmcvar,dha_t,true>(p, res, headers);
+        }
+}
+
+
 int main(int, char **)
 {
 //    int res=mcheck(nullptr);
@@ -460,10 +469,8 @@ int main(int, char **)
 
     try
     {
-
         std::ofstream logf("zsk.log");
         sys::setlog(logf);
-
 
         sys::seed(0);
     //    using O=csvlpsolver<realvar>;
@@ -473,14 +480,17 @@ int main(int, char **)
         {
             dtestparams p;
 
-            p.T=3;
+            p.T=1;
             p.trivialm=true;//false
             p.almleaves = 1;//2;
             p.etaleaves = 1;//2
             p.lambda=1;
             p.delta = 0.2;
             p.sddp = true;
-            dtest<mpmcvar /*nestedmcvar*/>(p);
+            dtest<mpmcvar /*nestedmcvar*/,
+//csvlpsolver<realvar>
+                    cplex<realvar>
+                    >(p);
         }
 
         if constexpr(0) // simple test
@@ -493,36 +503,21 @@ int main(int, char **)
             p.etaleaves = 1;
             p.lambda=0.1;
             p.delta = 0.2;
-            p.sddp = false;
+            p.sddp = true;
             dtest<mpmcvar/*,csvlpsolver<realvar>*/>(p);
         }
 
         compparams p;
-        if  constexpr(1)
+        if constexpr(1)
+            grid(res);
+        if  constexpr(0)
         {
-            p.comment = "varrho 0.96 - martingal";
-
             p.T = 1;
-            p.patoms = 20;
+            p.patoms = 10;
 
-            p.id = "prelim10d5psi";
-            p.lambda = 0.1;
-            cont<nestedmcvar,cha_t>(p, res, true);
-/*
-            p.id = "lambda0c";
             p.lambda = 1;
-            cont<nestedmcvar,dha_t>(p, res, false);*/
-
-        }
-        if  constexpr(0) // asctronomic upper bound
-        {
-//            p.id = "lambda05";
-//            p.lambda = 0.5;
-//            cont<nestedmcvar,cha_t>(p, res);
-            p.T = 2;
-            p.id = "lambda10";
-            p.lambda = 0.1;
-            cont<nestedmcvar,cha_t>(p, res,true);
+            p.omega = 0.5;
+            cont<nestedmcvar,dha_t,false>(p, res, true);
          }
 #endif // RISKNEUTRAL
         if  constexpr(0)
