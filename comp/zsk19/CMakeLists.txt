@@ -4,10 +4,12 @@ cmake_minimum_required(VERSION 2.8)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+include_directories(../mspp/)
+
 
 ###required for sddp
 
-include_directories(../../../../mspp/mspp/sddp/source)
+include_directories(../mspp/sddp/source)
 set( COIN_HEADER_DIR "/usr/local/lib/coin/build/include/coin" )
 
 #COIN-OR headers, put your directory
@@ -46,7 +48,7 @@ add_definitions( -DIL_STD )
 #CPLEX - headers, put your directory
 include_directories(${CPLEX_HEADER_DIR} )
 include_directories(${CONCERT_HEADER_DIR} )
-include_directories(../../../../mspp/mspp/)
+include_directories(../mspp/mspp/)
 include_directories(.)
 
 #CPLEX - libraries to link
@@ -61,7 +63,7 @@ find_package (Threads REQUIRED)
 # set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -lmcheck -pedantic")
 
 
-file(GLOB SRC_LIST "src/*.cpp" "../../../../mspp/mspp/sddp/source/*.cpp" "../../../../mspp/mspp/sddp/source/alglib/*.cpp"  "../../../../mspp/mspp/sddp/source/rngstream/*.cpp" )
+file(GLOB SRC_LIST "src/*.cpp" "../mspp/sddp/source/*.cpp" "../../../../mspp/mspp/sddp/source/alglib/*.cpp"  "../mspp/sddp/source/rngstream/*.cpp" )
 
 add_executable(${PROJECT_NAME} ${SRC_LIST})
 

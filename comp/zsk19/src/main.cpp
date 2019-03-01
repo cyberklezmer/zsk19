@@ -438,6 +438,33 @@ void atest(const vector<double>& x0,
     T = saveT;
 }
 
+
+void mainanal( std::ofstream& res)
+{
+    compparams p;
+    p.T = 3;
+    p.patoms = 15;
+
+    bool headers = true;
+    for(double lambda = 0.1; lambda < 1.001; lambda+=0.45) //0.45)
+        for(double omega = 0.0; omega < 1.001; omega+=0.5 ) //0.5)
+        {
+            ostringstream s;
+            s << "lambda" << lambda << "omega"
+              << omega << "n" << p.patoms;
+            p.lambda = lambda;
+            p.omega = omega;
+            p.id = s.str();
+            cont<nestedmcvar,dha_t,false>(p, res, headers);
+            headers = false;
+            s << "nox";
+            p.id = s.str();
+            cont<nestedmcvar,dha_t,true>(p, res, headers);
+        }
+}
+
+
+
 void prelim( std::ofstream& res)
 {
     compparams p;
@@ -515,7 +542,9 @@ int main(int, char **)
         compparams p;
         if constexpr(0)
             prelim(res);
-        if  constexpr(1)
+        if constexpr(1)
+            mainanal(res);
+        if  constexpr(0)
         {
             p.T = 1;
             p.patoms = 10;

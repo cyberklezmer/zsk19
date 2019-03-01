@@ -1,0 +1,3 @@
+[submodule "mspp"]
+	path = comp/mspp
+	url = https://github.com/cyberklezmer/mspp
