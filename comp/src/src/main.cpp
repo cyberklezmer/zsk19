@@ -204,6 +204,7 @@ struct compparams
     string id = string("nan");
     string comment = string("");
     unsigned int T = ::T;
+    double varrho = ::varrho;
     unsigned int patoms = 3;
     double lambda = 0.5;
     double omega = 0;
@@ -228,6 +229,8 @@ void cont(const compparams& pars, std::ofstream& res,
     constexpr bool contin = std::is_same<ha_t,cha_t>::value;
     unsigned int saveT = T;
     T=pars.T;
+    double savevarrho = varrho;
+    varrho = pars.varrho;
     using stdd_t=stdnormaldistribution;
 
     ostringstream rdn;
@@ -368,6 +371,7 @@ void cont(const compparams& pars, std::ofstream& res,
         rdet << endl;
     }
 
+    varrho = savevarrho;
     T = saveT;
 }
 
@@ -434,11 +438,12 @@ void atest(const vector<double>& x0,
     T = saveT;
 }
 
-void grid( std::ofstream& res)
+void prelim( std::ofstream& res)
 {
     compparams p;
     p.T = 3;
     p.patoms = 10;
+    p.varrho = 0.96;
 
     bool headers = true;
     for(double lambda = 0.1; lambda < 1.001; lambda+=0.9) //0.45)
@@ -508,15 +513,15 @@ int main(int, char **)
         }
 
         compparams p;
-        if constexpr(1)
-            grid(res);
-        if  constexpr(0)
+        if constexpr(0)
+            prelim(res);
+        if  constexpr(1)
         {
             p.T = 1;
             p.patoms = 10;
 
-            p.lambda = 1;
-            p.omega = 0.5;
+            p.lambda = 0.1;
+            p.omega = 0;
             cont<nestedmcvar,dha_t,false>(p, res, true);
          }
 #endif // RISKNEUTRAL

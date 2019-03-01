@@ -12,9 +12,8 @@ using namespace mspp;
 // paste from params.ods
 
 extern	unsigned int T	;
-extern	const double varrho	;
+extern	double varrho	;
 extern	const double iota	;
-extern	const double Fper	;
 extern	const vector<vector<double>> epsvsq
                 ;
 extern	const double X0	;

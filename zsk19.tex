@@ -248,6 +248,130 @@ useless ones; thus, we may assume all the options are exercised. The company may
 The company is risk-averse minimizing the discounted nested mean-CVaR
 risk measure, applied to the difference of the profits from the production and the costs of emission trading. 
 
+\subsection*{Problem definition}
+
+
+As it was premised, the subject of decision is the emission trading. In particular, the decision variables at $t$ include the amount $\Delta s_{t}$ of
+the spot allowances purchased/sold at time $t$, the amounts $$\Delta f_{t}=(\Delta f_{t}^{t+1},\dots,\Delta f_{t}^{T})$$
+of the futures with maturities $t+1,\dots,T$ purchased, and the amounts
+\[
+\Delta \phi_{t}=\left[\begin{array}{ccc}
+\Delta \phi_{t}^{t+1,1} & \dots & \Delta \phi_{t}^{T,1}\\
+\vdots &  & \vdots\\
+\Delta \phi_{t}^{t+1,\kappa} & \dots & \Delta \phi_{t}^{T,\kappa}
+\end{array}\right],
+\qquad
+\Delta \psi_{t}=\left[\begin{array}{ccc}
+\Delta \psi_{t}^{t+1,1} & \dots & \Delta \psi_{t}^{T,1}\\
+\vdots &  & \vdots\\
+\Delta \psi_{t}^{t+1,\kappa} & \dots & \Delta \psi_{t}^{T,\kappa}
+\end{array}\right],
+\]
+of the call options, put options, respectively, purchased/sold; here, $\Delta \phi_t^{\tau,i}$/$\Delta \psi_t^{\tau,i}$ denotes the number of call/put options with maturity $\tau$ and strike price $K_i$ / $L_i$, for any 
+$
+0 \leq t < \tau \leq T
+$, $1\leq i \leq \kappa$.
+
+At $t=0$, the income of the company is negative, consisting of (minus) coses for spot and options purchases:
+$$
+y_0=-P_0\Delta s_0
+- \sum_{\tau=1}^{T}\sum_{i=1}^{\kappa}B_0^{\tau,i}\Delta \phi_0^{\tau,i},
+- \sum_{\tau=1}^{T}\sum_{i=1}^{\kappa}C_0^{\tau,i}\Delta \psi_0^{\tau,i}.
+$$
+At any $0<t\leq T$, in addition, the income includes profit from production, costs of futures with maturity $t$, and costs of spots secured by the options:
+\begin{multline*}
+y_t  =X_t-P_t \Delta s_t
+-\sum_{i=1}^{\kappa}\min(P_t,K_{i})\phi_{t-1}^{t,i}
++\sum_{i=1}^{\kappa}\max(P_t,L_{i})\psi_{t-1}^{t,i}
+-\sum_{\tau=0}^{t-1}Q_{\tau}^{t}\Delta f_{\tau}^t-\sum_{\tau=t+1}^{T}\sum_{i=1}^{\kappa}B_t^{\tau,i}\Delta\phi_t^{\tau-t,i}-
+\sum_{\tau=t+1}^{T}\sum_{i=1}^{\mu}C_t^{\tau,i}\Delta\psi_t^{\tau-t,i}
+\end{multline*}
+Here, $f_t=\sum_{\tau=0}^t \Delta f^t_\tau$, 
+$\phi_t=\sum_{\tau=0}^t \Delta \phi_\tau^t$ and $\psi_t=\sum_{\tau=0}^t \Delta \psi_\tau^t$. Further, $X_t\in \R_+$ is the profit from the production at time $t$, $Y_t \in \R_+$ is the amount of the emissions at $t$, $P_t\in\R_{+}$ is the spot price at time $t$, $Q_t^\tau \in \R_+$ is the price of the future with maturity $\tau$ at time $t$, and $B_t^{\tau,i}\in \R_+$ and $B_t^{\tau,i}\in \R_+$  are the premia paid at $t$ for the call, put, respectively, option with strike price $K_i$, $L_i$, respectively, and with maturity $\tau$. 
+
+%Further, we assume that the overall loss exceeding a limit $R$ is penalized %by a rate $\iota$, the penalty amounting to 
+%$$
+%w_T=\iota\left[\sum_{t=0}^T y_t - R\right]_-.
+%$$
+
+Finally, we assume the decision criterion to be $\rho(-y_0,\dots,-y_T+w_T)$
+where
+$$
+\rho(c_0,\dots,c_T)=\mu_1(\mu_2(\dots\mu_T(c_0+\varrho c_1+\dots+\varrho ^ T c_T)\dots));
+$$
+here, $\F_t$ is the information available at $t$, $\mu_t(Z)=(1-\lambda)\E(Z|\F_{t-1})+\lambda \mathrm{CVaR}_\alpha(Z|\F_{t-1})$, $0\leq \lambda \leq 1$ and $0<\alpha<1$ are constants and $\varrho$ is a discount factor.
+
+\global\long\def\indep#1{{\perp\hspace{-2mm}\perp}#1}%
+
+\section{Data}
+
+$T=0$ odpovídá začátku 2018, $T=3$ (end of 2020)
+
+For the spot prices $P$ and the spreads $Q$ we adopt model from (anor). In particular, we fit the evolution of $P$ by 
+\[
+P_{t}=P_{0}\exp\left\{ \sum\nolimits_{\tau=1}^t u_{\tau} \right\},
+\qquad u_t \sim \mathcal{N}\left(
+-\frac{\sigma^2}{2},\sigma^2
+\right),\qquad 1\leq t \leq T, 
+\]
+with $\sigma=0.439$ where $u_{1},\dots,u_T$ are i.i.d., and
+\begin{equation}\label{eq:fp}
+Q^\tau_{t}=P_t\exp\{(\tau-t)(0.00974+v^\tau_{t})\},\qquad v^\tau_{t}\sim \mathcal{N}(0,\varsigma^2),\qquad 1\leq t< \tau,\quad 1\leq \tau \leq T,
+\end{equation}
+with $\varsigma=0.010$ where $v^2_1,v_1^3,v_2^3,\dots$ are i.i.d., independent of $u_1,\dots,u_T$.
+
+The initial prices are equal to 
+$$P_0=7.77, \quad Q^1_0=7.81,\quad Q^2_0=7.87,\quad Q^3_0=7.97$$ %markets.businessinsider.com
+
+Option prices $B^{\tau,i}_t$ are computed by the Black-Scholes formula with the implied volatility being a quadratic function of the strike price relative to the spot price. The shape of the function, depicted in Picture XX, has been estimated using 110 observations of actual option prices on ???market. As the risk-less rate $1.75\%$ was taken, being equal to ???. Two strike prices were considered for each type of options: $K_1=8$, $K_2=10$, $L_1=8$, $L_2=6$.
+
+\pgfimage[width=7cm]{smile}
+
+Our model of yearly profits $X$ (ih thousands of EUR) and emissions $Y$ (in metric tonnes) was estimated using their monthly hypothetical historical values from 2014 to 2016, as 
+\begin{equation}
+\left[X_t
+\atop
+Y_t
+\right]
+=\left[37,847.73
+\atop
+232,561.57
+\right]+
+\left[
+\begin{array}{cc}
+0.6981 & -0.1211 \\
+1.712 & -0.2638
+\end{array}
+\right]
+\left[X_{t-1}
+\atop
+Y_{t-1}
+\right]
+ + e_t,\qquad e_t = \mathcal{N}\left(0,V\right)  
+\end{equation}
+where $e_1,e_2,\dots$ are i.i.d. and $V$ is a variance matrix defined by standard deviations $7,968$ and $25,499$ and correlation $0.7368$. As the initial values, we took
+$$
+X_0 = 33,735,\qquad Y_0 = 246,974.
+$$
+See Appendix for the construction of the model for $X$ and $Y$. \footnote{We neglect the fixed costs as the income depends on these costs only upt up to an additive. Thus, if these costs are deterministic, then they do not alter the optimal solutions.}
+
+
+
+We further assume that, at any $t$, the company observes the history of $P,Q,X,Y$ up to $t$, and they are  partially informed about $X$ and $Y$ one step ahead, namely that 
+$$
+e_t = f_t+g_t, \qquad f_t \sim \mathcal{N}(0,\omega V), 
+\qquad
+g_t \sim \mathcal{N}(0,(1-\omega) V),f_t \indep g_t,\qquad 1 \leq t \leq T,
+$$
+for some $0\leq \omega \leq 1$, and
+$$
+\F_t = \sigma( (P_\tau,Q_\tau,X_\tau,Y_\tau)_{\tau \leq t}, f_{t+1} )
+$$
+
+The discount factor $\varrho$ was chosen to reflect the risk free rate, i.e. $\varrho=0.9815$.
+		
+\section{Solution}
+
 \subsection*{Preliminary analysis}
 
 In this Section, we illustrate the problem of the optimal emission covering on a simplified one-stage example. 
@@ -355,130 +479,24 @@ where the bound is attained for $x=0$, i.e. put options will no way help to redu
 
 Clearly, buying all the spots at time one leads to the costs $F = Y_1 P_1$ with $\sigma(F)=\sup P_1 \sup Y_1$.
 
-Summarized, if we are to choose which instrument to use, we will choose futures if $Q_0 < K+b$ or call options otherwise. In both the cases. the amount of the instruments will correspond to the worst possible need for the emissions.
-
-In the model we study in the present paper, the situation is much more complex: Mean-CVaR is used instead of the supremum, the random variables are continuous, and, most importantly, the problem is dynamic with the nested structure. Nevertheless, as it will be described below, the results given by the complex model are similar to a certain extent.
-
-\subsection*{Problem definition}
-
-
-As it was premised, the subject of decision is the emission trading. In particular, the decision variables at $t$ include the number $\Delta s_{t}$ of
-the spot allowances purchased/sold at time $t$, the numbers $$\Delta f_{t}=(\Delta f_{t}^{t+1},\dots,\Delta f_{t}^{T})$$
-of the futures with maturities $t+1,\dots,T$ purchased, and the numbers 
-\[
-\Delta \phi_{t}=\left[\begin{array}{ccc}
-\Delta \phi_{t}^{t+1,1} & \dots & \Delta \phi_{t}^{T,1}\\
-\vdots &  & \vdots\\
-\Delta \phi_{t}^{t+1,\kappa} & \dots & \Delta \phi_{t}^{T,\kappa}
-\end{array}\right],
-\qquad
-\Delta \psi_{t}=\left[\begin{array}{ccc}
-\Delta \psi_{t}^{t+1,1} & \dots & \Delta \psi_{t}^{T,1}\\
-\vdots &  & \vdots\\
-\Delta \psi_{t}^{t+1,\mu} & \dots & \Delta \psi_{t}^{T,\mu}
-\end{array}\right],
-\]
-of the call options, put options, respectively, purchased/sold; here, $\Delta \phi_t^{\tau,i}$/$\Delta \psi_t^{\tau,i}$ denotes the number of call/put options with maturity $\tau$ and strike price $K_i$ / $L_i$.
-
-At $t=0$, the income of the company is
-$$
-y_0=-P_0\Delta s_0
-- \sum_{\tau=1}^{T}\sum_{i=1}^{\kappa}B_0^{\tau,i}\Delta \phi_0^{\tau,i},
-- \sum_{\tau=1}^{T}\sum_{i=1}^{\mu}C_0^{\tau,i}\Delta \psi_0^{\tau,i},
-$$
-while, at any $0<t\leq T$, the income is
-\begin{multline*}
-y_t  =X_t-P_t \Delta s_t
--\sum_{i=1}^{\kappa}\min(P_t,K_{i})\phi_{t-1}^{t,i}
-+\sum_{i=1}^{\mu}\max(P_t,L_{i})\psi_{t-1}^{t,i}
--\sum_{\tau=0}^{t-1}Q_{\tau}^{t}\Delta f_{\tau}^t-\sum_{\tau=t+1}^{T}\sum_{i=1}^{\kappa}B_t^{\tau,i}\Delta\phi_t^{\tau-t,i}-
-\sum_{\tau=t+1}^{T}\sum_{i=1}^{\mu}C_t^{\tau,i}\Delta\psi_t^{\tau-t,i}
-\end{multline*}
-Here, $f_t=\sum_{\tau=0}^t \Delta f^t_\tau$, 
-$\phi_t=\sum_{\tau=0}^t \Delta \phi_\tau^t$ and $\psi_t=\sum_{\tau=0}^t \Delta \psi_\tau^t$. Further, $X_t\in \R_+$ is the profit from the production at time $t$, $Y_t \in \R_+$ is the amount of the emissions at $t$, $P_t\in\R_{+}$ is the spot price at time $t$, $Q_t^\tau \in \R_+$ is the price of the future with maturity $\tau$ at time $t$, and $B_t^{\tau,i}\in \R_+$ is the premium paid at $t$ for the call option with strike price $K_i$ and maturity $\tau$. 
-
-Further, we assume that the overall loss exceeding a limit $R$ is penalized by a rate $\iota$, the penalty amounting to 
-$$
-w_T=\iota\left[\sum_{t=0}^T y_t - R\right]_-.
-$$
-
-Finally, we assume the decision criterion to be $\rho(-y_0,\dots,-y_T+w_T)$
-where
-$$
-\rho(c_0,\dots,c_T)=\mu_1(\mu_2(\dots\mu_T(c_0+\varrho c_1+\dots+\varrho ^ T c_T)\dots));
-$$
-here, $\F_t$ is the information available at $t$, $\mu_t(Z)=(1-\lambda)\E(Z|\F_{t-1})+\lambda \mathrm{CVaR}_\alpha(Z|\F_{t-1})$, $0\leq \lambda \leq 1$ and $0<\alpha<1$ are constants and $\varrho$ is a discount factor.
-
-\global\long\def\indep#1{{\perp\hspace{-2mm}\perp}#1}%
-
-\section{Data}
-
-$T=0$ odpovídá začátku 2018, $T=3$ (end of 2020)
-
-For the spot prices $P$ and the spreads $Q$ we adopt model from (anor). In particular, we fit the evolution of $P$ by 
-\[
-P_{t}=P_{0}\exp\left\{ \sum\nolimits_{\tau=1}^t u_{\tau} \right\},
-\qquad u_t \sim \mathcal{N}\left(
--\frac{\sigma^2}{2},\sigma^2
-\right),\qquad 1\leq t \leq T, 
-\]
-with $\sigma=0.439$ where $u_{1},\dots,u_T$ are i.i.d., and
-\[
-Q^\tau_{t}=P_t\exp\{(\tau-t)(0.00974+v^\tau_{t})\},\qquad v^\tau_{t}\sim \mathcal{N}(0,\varsigma^2),\qquad 1\leq t< \tau,\quad 1\leq \tau \leq T,
-	\]
-with $\varsigma=0.010$ where $v^2_1,v_1^3,v_2^3,\dots$ are i.i.d., independent of $u_1,\dots,u_T$.
-
-The initial prices are equal to 
-$$P_0=7.77, \quad Q^1_0=7.81,\quad Q^2_0=7.87,\quad Q^3_0=7.97$$ %markets.businessinsider.com
-
-Option prices $B^{\tau,i}_t$ are computed by the Black-Scholes formula with the implied volatility being a quadratic function of the strike price relative to the spot price. The shape of the function, depicted in Picture XX, has been estimated using 110 observations of actual option prices on ???market. As the risk-less rate ??? was taken. 
-
-\pgfimage[width=7cm]{smile}
-
-Our model of yearly profits $X$ (ih thousands of EUR) and emissions $Y$ (in metric tonnes) was estimated using their monthly hypothetical historical values from 2014 to 2016, as 
-\begin{equation}
-\left[X_t
-\atop
-Y_t
-\right]
-=\left[37,847.73
-\atop
-232,561.57
-\right]+
-\left[
-\begin{array}{cc}
-0.6981 & -0.1211 \\
-1.712 & -0.2638
-\end{array}
-\right]
-\left[X_{t-1}
-\atop
-Y_{t-1}
-\right]
- + e_t,\qquad e_t = \mathcal{N}\left(0,V\right)  
+Summarized, if we are to choose which instrument to use, we will choose futures if 
+\begin{equation}\label{eq:whenoptions}
+Q_0 < K+b
 \end{equation}
-where $e_1,e_2,\dots$ are i.i.d. and $V$ is a variance matrix defined by standard deviations $7,968$ and $25,499$ and correlation $0.7368$. As the initial values, we took
-$$
-X_0 = 33,735,\qquad Y_0 = 246,974.
-$$
-See Appendix for the construction of the model for $X$ and $Y$. 
+ or call options otherwise. In both the cases. the amount of the instruments will correspond to the worst possible need for the emissions.
 
-We further assume that, at any $t$, the company observes the history of $P,Q,X,Y$ up to $t$, and they are  partially informed about $X$ and $Y$ one step ahead, namely that 
-$$
-e_t = f_t+g_t, \qquad f_t \sim \mathcal{N}(0,\omega V), 
-\qquad
-g_t \sim \mathcal{N}(0,(1-\omega) V),f_t \indep g_t,\qquad 1 \leq t \leq T,
-$$
-for some $0\leq \omega \leq 1$, and
-$$
-\F_t = \sigma( (P_\tau,Q_\tau,X_\tau,Y_\tau)_{\tau \leq t}, f_{t+1} )
-$$
-		
-\section{Solution}
+Obviously, in our setting, the situation is much more complex: Mean-CVaR is used instead of the supremum, the random variables are continuous, and, most importantly, the problem is dynamic with the nested structure. Nevertheless, as it will be described below, the results given by the complex model are similar to a certain extent. 
+
+First of all, our preliminary results suggest that the futures will be used rather than options, because, for instance, $K_1+B_0^{1,1}=8.0+2.22=10.22$, $K_2+B_0^{1,2}=10+1.41=11.41$ which is both much greater than both $P_0=7.77$ (the spot price) and $\varrho Q_0=0.96 \times 7.81=7.4976$ (see  \ref{eq:whenoptions}), results for other strike prices would be similar. 
+
+Further, whether to buy futures, or (to borrow) a spot, will depend most on the discount factor $\rho$. Once the risk is measured by a coherent risk measure, then, at $t$, the spot will be chosen rather than the future with maturity $t+1$ if $P_t < \varrho Q^{t+1}_t$. Given (\ref{eq:fp}), this happens iff $v^{t+1}_t>-\mathrm{ln} \varrho - 0.00974$. The probability of this event being $83\%$ if $\varrho = 1$, $15\%$ if $\varrho = 0.98$, but only $0.1\%$ if $\varrho = 0.96$.
+
+\subsection{The Solution}
+
 
 As it is clear from the previous Section, random parameters $P$, $X$ and $Y$ are time dependent rather than conditionally independent given some Markov chain, as it is required for the Markov SDDP algorithm. As neither $X_t$ nor  $Y_t$ are multiplied by a decision variable in the constraints of the problem, their time-dependence may be circumvented by regarding them as decision variables, constrained by (\ref{xymodel}); the i.i.d. residuals from (\ref{xymodel}) then become new random parameter. As $P$ is multiplied by other decision variables in the constraints, this trick cannot be used here. Instead, we approximate $P$ by a Hidden Markov Process according to  \citep{smid2019solution}. As the residuals from (\ref{xymodel}) are i.i.d. and as  $Q^\bullet_t$ -- the remaining random parameters -- are functions of $P$ and i.i.d. series, it follows that the vector of the new random parameters is a Hidden Markov chain process, hence eligible for Markov SDDP. For more details, see \citet{smid2019solution}.
 
-
+TBD approximation of $P$ (Martin)
 
 
 \section*{References}
