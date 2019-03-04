@@ -1,7 +1,7 @@
 #include "zsk.h"
 
 unsigned int T	=	3		;
-double varrho	=	0.9825		;
+double varrho	=	0.96		;
 const double iota	=	0		;
 const vector<vector<double>> epsvsq	={	{6388.32,4762.16}	,
         {4762.16,25050.4}	}	;

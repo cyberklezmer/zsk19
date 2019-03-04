@@ -547,7 +547,7 @@ int main(int, char **)
         if  constexpr(0)
         {
             p.T = 1;
-            p.patoms = 10;
+            p.patoms = 15;
 
             p.lambda = 0.1;
             p.omega = 0;
