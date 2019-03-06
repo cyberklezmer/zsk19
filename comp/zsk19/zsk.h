@@ -257,7 +257,7 @@ public:
 };
 
 
-template <typename O, bool nox = true>
+template <typename O, bool nox = true, bool nod = false>
 class zskproblem: public msproblem<O, linearfunction,
         linearmsconstraint,vector<double>,realvar,lastx>
 {
@@ -508,11 +508,11 @@ cout << endl;*/
         }
         xs[et].setlimits(0,instnbound);
         for(i=firstft; i<firstft+nft(k); i++)
-            xs[i].setlimits(0,instnbound);
+            xs[i].setlimits(0,nod ? 0 : instnbound);
         for( ;i<firstft+nft(k)+ndft(k); i++)
-            xs[i].setlimits(0,instnbound);
+            xs[i].setlimits(0,nod ? 0 : instnbound);
         for(; i<xs.size(); i++)
-            xs[i].setlimits(0,instnbound);
+            xs[i].setlimits(0,nod ? 0 : instnbound);
 
         unsigned int ls = k ? this->xdim(k)+this->xdim(k-1) : this->xdim(k);
         unsigned int toff = k ? this->xdim(k-1) : 0;
