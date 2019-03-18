@@ -222,7 +222,7 @@ public:
 using cha_t = chmcapproximation<arnormalprocessdistribution,onedcovering,true>;
 using dha_t=dhmcapproximation<arnormalprocessdistribution,onedcovering,1,true,expmapping>;
 
-template <typename O,typename ha_t, bool nox, bool nod>
+template <typename O,typename ha_t, bool nox, bool nod, bool nob>
 void cont(const compparams& pars, std::ofstream& res,
           bool headers = false  )
 {
@@ -277,10 +277,10 @@ void cont(const compparams& pars, std::ofstream& res,
 //cout << "prs" << endl;
 //    cout << ha.d(1).first().m() << endl;
 //cout << endl;
-    if constexpr(std::is_same<ha_t,dha_t>::value)
-    {
-        printtreed(cout,ha);
-    }
+//    if constexpr(std::is_same<ha_t,dha_t>::value)
+//    {
+//        printtreed(cout,ha);
+//    }
 
 /*
     for(unsigned int i=1; i<=T; i++)
@@ -303,7 +303,7 @@ void cont(const compparams& pars, std::ofstream& res,
 
     using zeta_t = hmczeta<pair<double, vector<double>>,zskm>;
 
-    zskproblem<O,nox,nod> p(pars.lambda,0.05);
+    zskproblem<O,nox,nod, nob> p(pars.lambda,0.05);
 
     vector<vector<std::string>> n;
     p.varnames(n);
@@ -331,7 +331,7 @@ void cont(const compparams& pars, std::ofstream& res,
         res << ",time,lb,ubm,ubb,states..." << endl;
      }
 
-    msddpsolution<zskproblem<O,nox,nod>,xieta_t,zeta_t,cplex<realvar>> sx(p,xieta,dims);
+    msddpsolution<zskproblem<O,nox,nod,nob>,xieta_t,zeta_t,cplex<realvar>> sx(p,xieta,dims);
 
     res << pars.id << "," << pars.lambda  << "," << pars.omega;
 
@@ -438,7 +438,7 @@ void atest(const vector<double>& x0,
     T = saveT;
 }
 
-template <bool nod>
+template <bool nod, bool nob>
 void mainanal( std::ofstream& res)
 {
     compparams p;
@@ -455,13 +455,35 @@ void mainanal( std::ofstream& res)
             p.lambda = lambda;
             p.omega = omega;
             p.id = s.str();
-            cont<nestedmcvar,dha_t,false,nod>(p, res, headers);
+            cont<nestedmcvar,dha_t,false,nod,nob>(p, res, headers);
             headers = false;
-            s << "nox";
-            p.id = s.str();
-            cont<nestedmcvar,dha_t,true,nod>(p, res, headers);
+//            s << "nox";
+//            p.id = s.str();
+//            cont<nestedmcvar,dha_t,true,nod,nob>(p, res, headers);
         }
 }
+
+
+
+void mcanal( std::ofstream& res)
+{
+    compparams p;
+    p.T = 2;
+    p.patoms = 15;
+    p.lambda = 0.55;
+    p.omega = 0.5;
+
+    bool headers = true;
+    for(unsigned int i=0; i<30; i++)
+    {
+        ostringstream s;
+        s << "mcanal" << i;
+        p.id = s.str();
+        cont<nestedmcvar,dha_t,false,false,false>(p, res, headers);
+        headers = false;
+    }
+}
+
 
 
 
@@ -482,11 +504,11 @@ void prelim( std::ofstream& res)
             p.lambda = lambda;
             p.omega = omega;
             p.id = s.str();
-            cont<nestedmcvar,dha_t,false,false>(p, res, headers);
+            cont<nestedmcvar,dha_t,false,false,false>(p, res, headers);
             headers = false;
             s << "nox";
             p.id = s.str();
-            cont<nestedmcvar,dha_t,true,false>(p, res, headers);
+            cont<nestedmcvar,dha_t,true,false,false>(p, res, headers);
         }
 }
 
@@ -507,6 +529,17 @@ int main(int, char **)
         sys::seed(0);
     //    using O=csvlpsolver<realvar>;
        using O=cplex<realvar>;
+
+       if constexpr(0)
+            mainanal<false,false>(res);
+       if constexpr(0)
+           mainanal<true,false>(res);
+       if constexpr(1)
+           mainanal<true,true>(res);
+       if constexpr(0)
+           mcanal(res);
+
+
 #ifndef RISKNEUTRAL
         if constexpr(0) // reproducing high upper bound
         {
@@ -542,8 +575,6 @@ int main(int, char **)
         compparams p;
         if constexpr(0)
             prelim(res);
-        if constexpr(1)
-            mainanal<true>(res);
         if  constexpr(0)
         {
             p.T = 1;
@@ -551,7 +582,7 @@ int main(int, char **)
 
             p.lambda = 0.1;
             p.omega = 0;
-            cont<nestedmcvar,dha_t,false,false>(p, res, true);
+            cont<nestedmcvar,dha_t,false,false,false>(p, res, true);
          }
 #endif // RISKNEUTRAL
         if  constexpr(0)
@@ -570,4 +601,5 @@ int main(int, char **)
 };
 
 
+// tbd vrátit 0.05 do cont
 
