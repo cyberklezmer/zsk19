@@ -70,7 +70,8 @@ const unsigned int kappa=	2	;
 
 // end of paste
 
-
+extern double volratio;
+extern bool truevol;
 
 class almdistribution:
         public fdistribution<double, unsigned int>
@@ -108,7 +109,7 @@ probability inline Phi(double x)
 double inline bsf(double spot, double strike, double tau)
 {
     double x = strike-spot;
-    double vol = bsc+bsl*x+bsq*x*x;
+    double vol = (truevol ? 0.439 : (bsc+bsl*x+bsq*x*x)) * volratio;
     double d1 = (log(spot/strike)+(rf+vol*vol/2.0)*tau)/vol/sqrt(tau);
     double d2 = d1-vol*sqrt(tau);
     double res = spot*Phi(d1)-strike*exp(-rf*tau)*Phi(d2);
@@ -257,7 +258,7 @@ public:
 };
 
 
-template <typename O, bool nox = true, bool nod = false>
+template <typename O, bool nox = true, bool nod = false, bool nob= false>
 class zskproblem: public msproblem<O, linearfunction,
         linearmsconstraint,vector<double>,realvar,lastx>
 {
@@ -517,7 +518,7 @@ cout << endl;*/
         unsigned int ls = k ? this->xdim(k)+this->xdim(k-1) : this->xdim(k);
         unsigned int toff = k ? this->xdim(k-1) : 0;
 
-        if(k==T)
+        if(k==T || nob)
             xs[et].setlimits(0,0);
 
         if(k==0)

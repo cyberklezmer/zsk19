@@ -222,7 +222,7 @@ public:
 using cha_t = chmcapproximation<arnormalprocessdistribution,onedcovering,true>;
 using dha_t=dhmcapproximation<arnormalprocessdistribution,onedcovering,1,true,expmapping>;
 
-template <typename O,typename ha_t, bool nox, bool nod, bool nob>
+template <typename O,typename ha_t, bool nox, bool nod, bool nob, bool setseed = true>
 void cont(const compparams& pars, std::ofstream& res,
           bool headers = false  )
 {
@@ -330,6 +330,9 @@ void cont(const compparams& pars, std::ofstream& res,
         }
         res << ",time,lb,ubm,ubb,states..." << endl;
      }
+
+    if constexpr(setseed)
+        sys::seed(350916502 + 1); // does not fully work , because another generator selects subscenarios in sddp library
 
     msddpsolution<zskproblem<O,nox,nod,nob>,xieta_t,zeta_t,cplex<realvar>> sx(p,xieta,dims);
 
@@ -441,6 +444,8 @@ void atest(const vector<double>& x0,
 template <bool nod, bool nob>
 void mainanal( std::ofstream& res)
 {
+    volratio = 1;
+    truevol = false;
     compparams p;
     p.T = 3;
     p.patoms = 15;
@@ -463,7 +468,81 @@ void mainanal( std::ofstream& res)
         }
 }
 
+double volratio = 1.0;
+bool truevol = false;
 
+void sensopt( std::ofstream& res)
+{
+    compparams p;
+    p.T = 3;
+    p.patoms = 15;
+    p.lambda = 0.55;
+    p.omega = 0.5;
+
+    bool headers = true;
+    for(unsigned int tv = 0; tv < 2; tv++)
+    for(volratio = 1.0; volratio > 0.24; volratio -= 0.25) //0.45)
+    {
+        ostringstream s;
+        truevol = tv;
+        s << "volratio" << volratio
+          << (truevol ? "truevol" : "smile") <<  "n" << p.patoms;
+        p.id = s.str();
+        cont<nestedmcvar,dha_t,false,false,false>(p, res, headers);
+        headers = false;
+    }
+    volratio = 1;
+    truevol = false;
+}
+
+
+void sensmc( std::ofstream& res)
+{
+    compparams p;
+    p.T = 3;
+    p.patoms = 15;
+    p.lambda = 0.55;
+    p.omega = 0.5;
+
+    bool headers = true;
+    for(unsigned int i = 0; i < 10; i++)
+    {
+        ostringstream s;
+        s << "mc" << i <<  "n" << p.patoms;
+        p.id = s.str();
+        cont<nestedmcvar,dha_t,false,false,false,false>(p, res, headers);
+        headers = false;
+    }
+    volratio = 1;
+    truevol = false;
+}
+
+
+void sensvarrho( std::ofstream& res)
+{
+    compparams p;
+    p.T = 3;
+    p.patoms = 15;
+    p.lambda = 0.55;
+    p.omega = 0.5;
+    p.varrho = 0.91;
+    bool headers = true;
+    for(unsigned int i = 0; i < 10; i++)
+    {
+        ostringstream s;
+        s << "varrho" << p.varrho <<  "n" << p.patoms;
+        p.id = s.str();
+        cont<nestedmcvar,dha_t,false,false,false,false>(p, res, headers);
+        headers = false;
+        p.varrho += 0.01;
+    }
+    volratio = 1;
+    truevol = false;
+}
+
+
+
+/*
 
 void mcanal( std::ofstream& res)
 {
@@ -484,7 +563,7 @@ void mcanal( std::ofstream& res)
     }
 }
 
-
+*/
 
 
 void prelim( std::ofstream& res)
@@ -519,6 +598,10 @@ int main(int, char **)
 //if(res)
 //        cerr << "error " << res << " starting mcheck" << endl;
 
+    enum etodo { emain, ewderivs, ewderivsandbanking, eoptsens, emcsens, evarrhosens};
+
+    etodo todo = evarrhosens;
+
     std::ofstream res("results.csv");
 
     try
@@ -526,18 +609,35 @@ int main(int, char **)
         std::ofstream logf("zsk.log");
         sys::setlog(logf);
 
+        switch(todo)
+        {
+        case emain:
+            mainanal<false,false>(res);
+            break;
+        case ewderivs:
+            mainanal<true,false>(res);
+            break;
+        case ewderivsandbanking:
+            mainanal<true,true>(res);
+            break;
+        case eoptsens:
+            sensopt(res);
+            break;
+        case emcsens:
+            sensmc(res);
+            break;
+        case evarrhosens:
+            sensvarrho(res);
+            break;
+        default:
+            assert(0);
+        }
         sys::seed(0);
     //    using O=csvlpsolver<realvar>;
        using O=cplex<realvar>;
 
-       if constexpr(0)
-            mainanal<false,false>(res);
-       if constexpr(0)
-           mainanal<true,false>(res);
-       if constexpr(1)
-           mainanal<true,true>(res);
-       if constexpr(0)
-           mcanal(res);
+//       if constexpr(0)
+//           mcanal(res);
 
 
 #ifndef RISKNEUTRAL
@@ -601,5 +701,4 @@ int main(int, char **)
 };
 
 
-// tbd vrátit 0.05 do cont
 
